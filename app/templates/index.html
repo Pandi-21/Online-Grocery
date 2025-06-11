@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>Welcome to Online Grocery</h1>
+
+<p>Shop fresh fruits, vegetables, and groceries from the comfort of your home. Delivered quickly and safely!</p>
+
+{% if not session.get('user_id') %}
+  <a href="/login"><button>Login</button></a>
+  <a href="/register"><button>Register</button></a>
+{% else %}
+  <a href="/products"><button>View Products</button></a>
+{% endif %}
+{% endblock %}

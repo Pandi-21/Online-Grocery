@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>My Orders - Online Grocery</title>
+   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body class="bg-light">
+<div class="container py-5">
+    <h2 class="mb-4 text-primary">📋 My Orders</h2>
+
+    {% if orders %}
+        {% set current_order = None %}
+        {% set total_amount = 0 %}
+        {% for item in orders %}
+            {% if current_order != item.order_id %}
+                {% if not loop.first %}
+                    </tbody>
+                    </table>
+                    <div class="text-end mb-5">
+                        <strong>Total: ₹{{ total_amount }}</strong>
+                    </div>
+                {% endif %}
+
+                {% set current_order = item.order_id %}
+                {% set total_amount = 0 %}
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <strong>Order ID:</strong> {{ item.order_id }} |
+                        <strong>Payment:</strong> {{ item.payment_method }} |
+                        <strong>Date:</strong> {{ item.order_date }}
+                    </div>
+                    <div class="card-body p-0">
+                        <table class="table mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>#</th>
+                                    <th>Product</th>
+                                    <th>Qty</th>
+                                    <th>Price (₹)</th>
+                                    <th>Subtotal (₹)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+            {% endif %}
+
+            <tr>
+                <td>{{ loop.index }}</td>
+                <td>{{ item.product_name }}</td>
+                <td>{{ item.quantity }}</td>
+                <td>{{ item.price }}</td>
+                <td>{{ item.item_total }}</td>
+            </tr>
+            {% set total_amount = total_amount + item.item_total %}
+
+            {% if loop.last %}
+                    </tbody>
+                    </table>
+                    <div class="text-end mb-4 me-3">
+                        <strong>Total: ₹{{ total_amount }}</strong>
+                    </div>
+                </div>
+                </div>
+            {% endif %}
+        {% endfor %}
+    {% else %}
+        <div class="alert alert-info">
+            You haven't placed any orders yet. <a href="/products">Start shopping</a> now!
+        </div>
+    {% endif %}
+</div>
+</body>
+</html>

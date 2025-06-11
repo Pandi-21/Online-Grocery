@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Online Grocery</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+  <!-- Header -->
+  <header>
+    <h1>Welcome to Online Grocery</h1>
+    <hr>
+  </header>
+
+  <!-- Navigation Bar -->
+  <nav>
+    <a href="/">Home</a>
+    {% if session.get('user_id') %}
+      <a href="/products">Products</a>
+      <a href="/cart">Cart</a>
+      <a href="/orders">Orders</a>
+      <a href="/logout">Logout</a>
+    {% else %}
+      <a href="/login">Login</a>
+      <a href="/register">Register</a>
+    {% endif %}
+    <hr>
+  </nav>
+
+  <!-- Main Page Content -->
+  <main class="container">
+    {% block content %}{% endblock %}
+  </main>
+
+  <!-- Footer -->
+  <footer>
+    <hr>
+    <p>&copy; 2025 Online Grocery</p>
+  </footer>
+
+  <!-- JS File -->
+  <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+
+</body>
+</html>
