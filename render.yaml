@@ -4,12 +4,13 @@ services:
     env: python
     buildCommand: ""
     startCommand: gunicorn run:app
+
     envVars:
       - key: MYSQL_HOST
-        value: your-db-host
+        value: localhost
       - key: MYSQL_USER
-        value: your-db-user
+        value: root
       - key: MYSQL_PASSWORD
-        value: your-db-password
+        value: Pandiyarajan_21
       - key: MYSQL_DATABASE
-        value: your-db-name
+        value: grocery_db
