@@ -2,33 +2,45 @@
 
 {% block content %}
 <div class="container mt-4">
-    <h2 class="mb-3">Add New Product</h2>
-    <form method="POST"  enctype="multipart/form-data">
-        <div class="mb-3">
-            <label for="name" class="form-label">Name:</label>
-            <input type="text" class="form-control" id="name" name="name" required>
-        </div>
+    <div class="section">
+        <h2 class="mb-4">Add New Product</h2>
 
-        <div class="mb-3">
-            <label for="description" class="form-label">Description:</label>
-            <textarea class="form-control" id="description" name="description" rows="3"></textarea>
-        </div>
+        <form method="POST" enctype="multipart/form-data">
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label for="name" class="form-label">Product Name</label>
+                    <input type="text" class="form-control" id="name" name="name" required>
+                </div>
 
-        <div class="mb-3">
-            <label for="price" class="form-label">Price:</label>
-            <input type="number" class="form-control" id="price" step="0.01" name="price" required>
-        </div>
+                <div class="col-md-6">
+                    <label for="price" class="form-label">Price (₹)</label>
+                    <input type="number" class="form-control" id="price" step="0.01" name="price" required>
+                </div>
+            </div>
 
-        <div class="mb-3">
-            <label for="stock" class="form-label">Stock:</label>
-            <input type="number" class="form-control" id="stock" name="stock" required placeholder="Enter Stock">
-        </div>
+            <div class="mb-3">
+                <label for="description" class="form-label">Description</label>
+                <textarea class="form-control" id="description" name="description" rows="3" placeholder="Write something about the product..."></textarea>
+            </div>
 
-        <div class="mb-3">
-        <label for="image" class="form-label">Product Image:</label>
-        <input type="file" class="form-control" id="image" name="image">
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label for="stock" class="form-label">Stock</label>
+                    <input type="number" class="form-control" id="stock" name="stock" required placeholder="Available quantity">
+                </div>
+
+                <div class="col-md-6">
+                    <label for="image" class="form-label">Product Image</label>
+                    <input type="file" class="form-control" id="image" name="image" accept="image/*">
+                </div>
+            </div>
+
+            <div class="text-center mt-4">
+                <button type="submit" class="btn btn-success"> Add Product</button>
+                <br/><br/>
+                                <a href="{{ url_for('products.products') }}" class="btn btn-secondary ms-2"> Back</a>
+            </div>
+        </form>
     </div>
-        <button type="submit" class="btn btn-success">Add Product</button>
-    </form>
 </div>
 {% endblock %}

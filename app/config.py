@@ -1,6 +1,8 @@
+import os
+
 MYSQL_CONFIG = {
-    'host': 'localhost',
-    'user': 'root',
-    'password': 'Pandiyarajan_21',
-    'database': 'grocerys_db'
+    'host': os.environ.get('localhost'),
+    'user': os.environ.get('root'),
+    'password': os.environ.get('Pandiyarajan_21'),
+    'database': os.environ.get('grocerys_db')
 }

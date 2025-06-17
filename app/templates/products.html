@@ -3,24 +3,20 @@
 {% block content %}
 <h2 class="mb-4">Products</h2>
 
-<form  method="POST" action="/cart/add-multiple">
+<form method="POST" action="/cart/add-multiple" id='multi-cart-form'>
   <div class="d-flex flex-wrap gap-4">
     {% for product in products %}
       <div class="card" style="width: 18rem;">
-         
-
         <img src="{{ product.image_url or '/static/default.jpg' }}" class="card-img-top" alt="{{ product.name }}" height="150">
         <div class="card-body">
           <h5 class="card-title">{{ product.name }}</h5>
           <p class="card-text">{{ product.description }}</p>
           <p class="card-text fw-bold">₹{{ product.price }}</p>
 
-          <!-- ✅ Checkbox with correct name -->
+          <!-- ✅ Select checkbox -->
           <div class="form-check mb-2">
-            <input class="form-check-input" type="checkbox" name="selected_products[]" value="{{ product.id }}" id="check-{{ product.id }}">
-            <label class="form-check-label" for="check-{{ product.id }}">
-              Select to Add
-            </label>
+            <input class="form-check-input" type="checkbox" name="selected_products[]" value="{{ product.id }}" id="check-{{ product.id }}"> 
+            <label class="form-check-label" for="check-{{ product.id }}">Select to Add</label>
           </div>
 
           <!-- ✅ Quantity input -->
@@ -29,22 +25,29 @@
             <input type="number" name="quantities_{{ product.id }}" id="quantity-{{ product.id }}" value="1" min="1" class="form-control" style="width: 80px;" required>
           </div>
 
-          <!-- 🛠️ Edit/Delete -->
+          <!-- ✅ Edit button -->
           <div class="mt-3 d-flex justify-content-between">
             <a href="{{ url_for('products.edit_product', product_id=product.id) }}" class="btn btn-warning btn-sm">Edit</a>
-            <form action="{{ url_for('products.delete_product', product_id=product.id) }}" method="POST">
-              <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure?');">Delete</button>
-            </form>
           </div>
+
+          <!-- ✅ Delete form (separate from main form) -->
+          <form action="{{ url_for('products.delete_product', product_id=product.id) }}" method="POST" class="mt-2">
+            <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure?');">Delete</button>
+          </form>
         </div>
       </div>
     {% endfor %}
   </div>
 
-  <!-- ✅ Submit button inside form -->
+  <!-- ✅ Submit button -->
   <div class="mt-4 text-center">
-    <button type="submit" class="btn btn-success"> Add to Cart</button>
+    <button type="submit" class="btn btn-success">Add to Cart</button>
     <a href="/products/add" class="btn btn-primary">Add New Product</a>
   </div>
 </form>
+
+ 
+ <script src="{{ url_for('static', filename='js/products.js') }}"></script>
+
+
 {% endblock %}

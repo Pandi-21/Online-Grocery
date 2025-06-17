@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container py-5">
+    <h2 class="mb-4 text-success">Checkout</h2>
+
+    <form method="POST" action="/checkout">
+        <table class="table table-bordered bg-white shadow-sm">
+            <thead class="table-success">
+                <tr>
+                    <th>#</th>
+                    <th>Product</th>
+                    <th>Qty</th>
+                    <th>Price (₹)</th>
+                    <th>Total (₹)</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% set grand_total = 0 %}
+                {% for item in items %}
+                <tr>
+                    <td>{{ loop.index }}</td>
+                    <td>{{ item.name }}</td>
+                    <td>{{ item.quantity }}</td>
+                    <td>{{ item.price }}</td>
+                    <td>{{ item.total }}</td>
+                </tr>
+                {% set grand_total = grand_total + item.total %}
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <div class="d-flex justify-content-end">
+            <h5><strong>Grand Total: ₹{{ grand_total }}</strong></h5>
+        </div>
+
+        <div class="mt-4">
+            <label for="payment_method" class="form-label">Select Payment Method:</label>
+            <select class="form-select" name="payment_method" id="payment_method" required>
+                <option value="">-- Choose --</option>
+                <option value="Cash on Delivery">Cash on Delivery</option>
+                <option value="UPI">UPI</option>
+                <option value="Credit Card">Credit Card</option>
+            </select>
+        </div>
+
+        <div class="mt-4 text-end">
+            <button type="submit" class="btn btn-success px-4">🛍️ Place Order</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

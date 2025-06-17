@@ -28,7 +28,6 @@ def cart_page():
 
     return render_template('cart.html', items=items)
 
-
 # ➖ Remove Item from Cart
 @order_bp.route('/cart/remove/<int:cart_id>', methods=['POST'])
 def remove_from_cart(cart_id):
@@ -39,7 +38,6 @@ def remove_from_cart(cart_id):
     cur.close()
     conn.close()
     return redirect('/cart')
-
 
 # ✅ Add to Cart (Single Product)
 @order_bp.route('/cart/add', methods=['POST'])
@@ -53,7 +51,7 @@ def add_to_cart():
 
     conn = get_connection()
     cur = conn.cursor()
-    
+
     cur.execute("SELECT quantity FROM cart WHERE user_id = %s AND product_id = %s", (user_id, product_id))
     existing = cur.fetchone()
     if existing:
@@ -64,24 +62,20 @@ def add_to_cart():
             INSERT INTO cart (user_id, product_id, quantity)
             VALUES (%s, %s, %s)
         """, (user_id, product_id, quantity))
-    
+
     conn.commit()
     cur.close()
     conn.close()
     return redirect('/cart')
 
-
-# ✅ Add Multiple Products to Cart (From products.html)
+# ✅ Add Multiple Products to Cart
 @order_bp.route('/cart/add-multiple', methods=['POST'])
 def add_multiple_to_cart():
-    product_id = request.form['product_id']
-    quantity = int(request.form['quantity'])
     user_id = session.get('user_id')
     if not user_id:
         return redirect('/login')
 
-    selected_products = request.form.getlist('selected_products[]')  # no need for [] in name
-
+    selected_products = request.form.getlist('selected_products[]')
     if not selected_products:
         return redirect('/products')
 
@@ -97,7 +91,6 @@ def add_multiple_to_cart():
 
         cur.execute("SELECT quantity FROM cart WHERE user_id = %s AND product_id = %s", (user_id, product_id))
         existing = cur.fetchone()
-
         if existing:
             cur.execute("UPDATE cart SET quantity = quantity + %s WHERE user_id = %s AND product_id = %s",
                         (quantity, user_id, product_id))
@@ -111,53 +104,65 @@ def add_multiple_to_cart():
 
     return redirect('/cart')
 
-
-# 💳 Checkout
-@order_bp.route('/checkout', methods=['POST'])
+# 💳 Checkout (GET & POST)
+@order_bp.route('/checkout', methods=['GET', 'POST'])
 def checkout():
     user_id = session.get('user_id')
     if not user_id:
         return redirect('/login')
 
-    payment_method = request.form.get('payment_method')
-
     conn = get_connection()
-    cur = conn.cursor()
+    cur = conn.cursor(dictionary=True)
 
-    cur.execute("SELECT product_id, quantity FROM cart WHERE user_id = %s", (user_id,))
-    cart_items = cur.fetchall()
+    if request.method == 'POST':
+        payment_method = request.form.get('payment_method')
 
-    if not cart_items:
+        cur.execute("SELECT product_id, quantity FROM cart WHERE user_id = %s", (user_id,))
+        cart_items = cur.fetchall()
+
+        if not cart_items:
+            cur.close()
+            conn.close()
+            return redirect('/cart')
+
+        total = 0
+        for item in cart_items:
+            cur.execute("SELECT price FROM products WHERE id = %s", (item['product_id'],))
+            price = cur.fetchone()['price']
+            total += price * item['quantity']
+
+        cur.execute("""
+            INSERT INTO orders (user_id, total_amount, payment_method)
+            VALUES (%s, %s, %s)
+        """, (user_id, total, payment_method))
+        order_id = cur.lastrowid
+
+        for item in cart_items:
+            cur.execute("SELECT price FROM products WHERE id = %s", (item['product_id'],))
+            price = cur.fetchone()['price']
+            cur.execute("""
+                INSERT INTO order_items (order_id, product_id, quantity, price)
+                VALUES (%s, %s, %s, %s)
+            """, (order_id, item['product_id'], item['quantity'], price))
+
+        cur.execute("DELETE FROM cart WHERE user_id = %s", (user_id,))
+        conn.commit()
         cur.close()
         conn.close()
-        return redirect('/cart')
 
-    total = 0
-    for item in cart_items:
-        cur.execute("SELECT price FROM products WHERE id = %s", (item[0],))
-        price = cur.fetchone()[0]
-        total += price * item[1]
+        return redirect('/orders')
 
+    # GET method — show checkout page
     cur.execute("""
-        INSERT INTO orders (user_id, total_amount, payment_method)
-        VALUES (%s, %s, %s)
-    """, (user_id, total, payment_method))
-    order_id = cur.lastrowid
-
-    for item in cart_items:
-        cur.execute("SELECT price FROM products WHERE id = %s", (item[0],))
-        price = cur.fetchone()[0]
-        cur.execute("""
-            INSERT INTO order_items (order_id, product_id, quantity, price)
-            VALUES (%s, %s, %s, %s)
-        """, (order_id, item[0], item[1], price))
-
-    cur.execute("DELETE FROM cart WHERE user_id = %s", (user_id,))
-    conn.commit()
+        SELECT c.id AS cart_id, p.name, p.price, c.quantity, (p.price * c.quantity) AS total
+        FROM cart c
+        JOIN products p ON c.product_id = p.id
+        WHERE c.user_id = %s
+    """, (user_id,))
+    items = cur.fetchall()
     cur.close()
     conn.close()
-    return redirect('/orders')
-
+    return render_template('checkout.html', items=items)
 
 # 📜 Order History
 @order_bp.route('/orders')
@@ -168,7 +173,6 @@ def order_history():
 
     conn = get_connection()
     cur = conn.cursor(dictionary=True)
-
     cur.execute("""
         SELECT o.id AS order_id, o.order_date, o.total_amount, o.payment_method,
                p.name AS product_name, oi.quantity, oi.price,
@@ -180,7 +184,6 @@ def order_history():
         ORDER BY o.order_date DESC
     """, (user_id,))
     orders = cur.fetchall()
-
     cur.close()
     conn.close()
     return render_template('orders.html', orders=orders)
