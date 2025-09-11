@@ -11,6 +11,8 @@ export default function CheckoutPage() {
     paymentMethod: "online",
   });
 
+  const [showModal, setShowModal] = useState(false);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
@@ -18,12 +20,12 @@ export default function CheckoutPage() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    alert("Order placed successfully!");
+    setShowModal(true); // open modal instead of alert
     console.log(formData);
   };
 
   return (
-    <div className="bg-gray-50 min-h-screen">
+    <div className="bg-gray-50 min-h-screen relative">
       <div className="max-w-6xl mx-auto p-8">
         <h1 className="text-3xl font-bold mb-8">Checkout</h1>
 
@@ -190,7 +192,26 @@ export default function CheckoutPage() {
           </div>
         </form>
       </div>
- 
+
+      {/* Modal */}
+      {showModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-lg p-8 w-11/12 max-w-md text-center">
+            <h2 className="text-2xl font-bold mb-4 text-green-600">
+              🎉 Your Order Has Been Placed!
+            </h2>
+            <p className="text-gray-600 mb-6">
+              Thank you for shopping with us. We’ll notify you when your order is on the way.
+            </p>
+            <button
+              onClick={() => setShowModal(false)}
+              className="bg-green-500 text-white px-6 py-2 rounded-lg hover:bg-green-600"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

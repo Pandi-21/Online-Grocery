@@ -1,9 +1,11 @@
 // src/components/ProductDetails.jsx
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { FaShoppingCart } from "react-icons/fa";
+import toast from "react-hot-toast";
 import RelatedProducts from "./RelatedProducts";
 
+// dummy data
 const dummyData = {
   1: {
     id: 1,
@@ -22,30 +24,63 @@ const dummyData = {
 
 export default function ProductDetails() {
   const { id } = useParams();
+  const navigate = useNavigate();
   const product = dummyData[id];
 
-  // for thumbnails
-  const [mainImage, setMainImage] = useState(
-    product?.images ? product.images[0] : ""
-  );
-
-  // for tabs
+  // UI state
+  const [mainImage, setMainImage] = useState(product?.images[0] || "");
   const [activeTab, setActiveTab] = useState("description");
-
-  // for dropdowns
   const [size, setSize] = useState("2 lb Bag");
   const [color, setColor] = useState("Red");
-  const [quantity, setQuantity] = useState(1);
+  const [quantity, setQuantity] = useState(1); // dropdown selection
+  const [cartQty, setCartQty] = useState(0); // shows add / counter
 
   if (!product) return <h2 className="p-8">Product not found</h2>;
 
+  // Add to cart button
+  const handleAddToCart = () => {
+    // add selected quantity
+    setCartQty((prev) => prev + quantity);
+    toast.success(`${product.name} added to your basket`, {
+      id: "basket",
+    });
+  };
+
+  // increment from counter
+  const handleIncrement = () => {
+    setCartQty((prev) => prev + 1);
+    toast.success(`Item added to your basket successfully `, { id: "basket" });
+  };
+
+  // decrement from counter
+  const handleDecrement = () => {
+    setCartQty((prev) => {
+      const newQty = prev - 1;
+      if (newQty <= 0) {
+        toast("Removed from your basket", {  id: "basket" });
+        return 0;
+      }
+      toast.success(`Removed from your basket`, { id: "basket" });
+      return newQty;
+    });
+  };
+
+  // Buy now: add first then go to cart/checkout
+  const handleBuyNow = () => {
+    // ensure at least one in cart
+    if (cartQty === 0) {
+      setCartQty(quantity);
+      toast.success(`${product.name} added & redirecting to checkout`, {
+        id: "basket",
+      });
+    }
+    navigate("/cart");
+  };
+
   return (
     <div className="p-8">
-      {/* Title & Price */}
-       
-      {/* top section: image + info */}
       <div className="flex flex-col md:flex-row gap-8">
-        {/* Left: Main Image + Thumbnails */}
+        {/* Left images */}
         <div className="flex-1">
           <img
             src={mainImage}
@@ -67,22 +102,18 @@ export default function ProductDetails() {
           </div>
         </div>
 
-        {/* Right: Actions */}
+        {/* Right info */}
         <div className="flex-1">
-        <h1 className="text-3xl font-bold mb-2">{product.name}</h1>
-      <p className="text-2xl font-semibold text-green-600 mb-6">
-        ${product.price}/lb
-      </p>
- <p className="text-gray-600 mb-6">
-            Crisp, sweet, and juicy. These organic gala apples are perfect for snacking,
-            salads, or baking into your favorite dessert.
+          <h1 className="text-3xl font-bold mb-2">{product.name}</h1>
+          <p className="text-2xl font-semibold text-green-600 mb-6">
+            ${product.price}/lb
           </p>
-          {/* Dropdowns */}
+          <p className="text-gray-600 mb-6">{product.description}</p>
+
+          {/* dropdowns */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Size
-              </label>
+              <label className="block text-sm font-medium mb-1">Size</label>
               <select
                 value={size}
                 onChange={(e) => setSize(e.target.value)}
@@ -94,9 +125,7 @@ export default function ProductDetails() {
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Color
-              </label>
+              <label className="block text-sm font-medium mb-1">Color</label>
               <select
                 value={color}
                 onChange={(e) => setColor(e.target.value)}
@@ -108,12 +137,10 @@ export default function ProductDetails() {
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Quantity
-              </label>
+              <label className="block text-sm font-medium mb-1">Quantity</label>
               <select
                 value={quantity}
-                onChange={(e) => setQuantity(e.target.value)}
+                onChange={(e) => setQuantity(Number(e.target.value))}
                 className="w-full border rounded-lg px-3 py-2"
               >
                 {[1, 2, 3, 4, 5].map((q) => (
@@ -123,19 +150,43 @@ export default function ProductDetails() {
             </div>
           </div>
 
-          {/* Buttons */}
+          {/* Add/Counter + Buy Now */}
           <div className="flex gap-4 mb-6">
-            <button className="flex items-center justify-center gap-2 bg-green-500 text-white px-6 py-3 rounded-lg hover:bg-green-600">
-              <FaShoppingCart /> Add to Cart
-            </button>
-            <button className="border border-green-500 text-green-500 px-6 py-3 rounded-lg hover:bg-green-100">
+            {cartQty === 0 ? (
+              <button
+                onClick={handleAddToCart}
+                className="flex items-center justify-center gap-2 bg-green-500 text-white px-6 py-3 rounded-lg hover:bg-green-600"
+              >
+                <FaShoppingCart /> Add to Cart
+              </button>
+            ) : (
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={handleDecrement}
+                  className="bg-red-500 text-white px-4 py-2 rounded-full"
+                >
+                  –
+                </button>
+                <span className="text-lg font-medium">{cartQty}</span>
+                <button
+                  onClick={handleIncrement}
+                  className="bg-green-500 text-white px-4 py-2 rounded-full"
+                >
+                  +
+                </button>
+              </div>
+            )}
+            <button
+              onClick={handleBuyNow}
+              className="border border-green-500 text-green-500 px-6 py-3 rounded-lg hover:bg-green-100"
+            >
               Buy Now
             </button>
           </div>
         </div>
       </div>
 
-      {/* ⬇️ Tabs now full width under image & info */}
+      {/* Tabs */}
       <div className="mt-8">
         <div className="border-b flex gap-6 mb-4">
           <button
@@ -192,9 +243,12 @@ export default function ProductDetails() {
         )}
       </div>
 
-      {/* Related Products full width */}
+      {/* Related products */}
       <div className="mt-12">
-        <RelatedProducts currentProductId={product.id} category={product.category} />
+        <RelatedProducts
+          currentProductId={product.id}
+          category={product.category}
+        />
       </div>
     </div>
   );

@@ -1,4 +1,5 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 
 const categories = [
   { name: "Fruits", img: "https://via.placeholder.com/150x150" },
@@ -17,6 +18,7 @@ const deals = [
 ];
 
 export default function Home() {
+  const navigate = useNavigate();
   return (
     <>
       {/* Hero */}
@@ -33,9 +35,12 @@ export default function Home() {
           <p className="mb-6">
             Get the freshest produce, dairy, and pantry staples delivered straight to your door.
           </p>
-          <button className="bg-green-500 hover:bg-green-600 text-white font-semibold px-6 py-3 rounded-full">
-            Shop Now
-          </button>
+          <button
+      className="bg-green-500 hover:bg-green-600 text-white font-semibold px-6 py-3 rounded-full"
+      onClick={() => navigate("/shop")}
+    >
+      Shop Now
+    </button>
         </div>
       </section>
 
@@ -67,18 +72,8 @@ export default function Home() {
         </div>
       </section>
 
-      {/* App Download */}
-      <section className="bg-green-50 py-12">
-        <div className="max-w-3xl mx-auto text-center px-4">
-          <h2 className="text-2xl font-bold mb-2">Download Our App</h2>
-          <p className="text-gray-600 mb-6">
-            Shop on the go with our mobile app for a seamless grocery experience.
-          </p>
-          <button className="bg-black text-white px-6 py-3 rounded-full hover:bg-gray-800">
-            Download Now
-          </button>
-        </div>
-      </section>
+       
+       
     </>
   );
 }
