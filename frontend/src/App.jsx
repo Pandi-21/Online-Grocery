@@ -16,18 +16,18 @@ import Login from "./Pages/Login";
 import { AuthProvider } from "./context/AuthContext";
 import ProtectedRoute from "./Components/ProtectedRoute";
 import AccountPage from "./Components/AccountPage";
+import AdminRoutes from "./admin/AdminRoutes";
 
 export default function App() {
   return (
     <AuthProvider>
       <Routes>
+        {/* 👇 Customer side routes */}
         <Route element={<UserLayout />}>
-          <Route path="*" element={<h1>Page Not Found</h1>} />
           <Route path="/" element={<Home />} />
           <Route path="/shop" element={<Shop />} />
           <Route path="/shop/:category" element={<ShopPage />} />
-          
-          {/* ✅ Protected product details */}
+
           <Route
             path="/product/:id"
             element={
@@ -41,7 +41,6 @@ export default function App() {
           <Route path="/recipes" element={<Recipes />} />
           <Route path="/about" element={<About />} />
 
-          {/* ✅ Protected checkout + cart */}
           <Route
             path="/checkout"
             element={
@@ -60,10 +59,14 @@ export default function App() {
           />
           <Route path="/account" element={<AccountPage />} />
 
-          {/* ✅ Auth routes */}
           <Route path="/signup" element={<Signup />} />
           <Route path="/login" element={<Login />} />
+          <Route path="*" element={<h1>Page Not Found</h1>} />
         </Route>
+
+        {/* 👇 Admin panel routes OUTSIDE UserLayout */}
+        <Route path="/admin/*" element={<AdminRoutes />} />
+        <Route path ="/dashboard" element={<AdminRoutes />} />
       </Routes>
     </AuthProvider>
   );
