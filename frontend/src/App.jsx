@@ -30,6 +30,11 @@ import BreakfastIdeas from "./Components/Receipes/BreakfastIdeas";
 import LunchDinner from "./Components/Receipes/LunchDinner";
 import DessertsDrinks from "./Components/Receipes/DessertsDrinks";
 import RecipeDetail from "./Components/Receipes/RecipeDetail";
+import OurStory from "./Components/About/OurStory";
+import ContactUs from "./Components/About/ContactUs";
+import Sustainability from "./Components/About/Sustainability";
+import Careers from "./Components/About/Careers";
+import FAQSupport from "./Components/About/FAQSupport";
  
 
 
@@ -44,51 +49,38 @@ export default function App() {
           <Route path="/shop" element={<Shop />} />
           <Route path="/productlist/:category" element={<ProductList />} />
 
-          <Route
-            path="/product/:id"
-            element={
-              <ProtectedRoute>
-                <ProductDetails />
-              </ProtectedRoute>
-            }
-          />
+          <Route path="/product/:id" element={<ProtectedRoute><ProductDetails /></ProtectedRoute>}/>   
 
           {/* Deals routes */}
-        <Route path="/deals/today" element={<OfferList type="todaysDeals" />} />
-<Route path="/deals/top" element={<OfferList type="topOffers" />} />
-<Route path="/deals/buy1get1" element={<OfferList type="buy1get1" />} />
-<Route path="/deals/seasonal" element={<OfferList type="seasonalSales" />} />
-<Route path="/deals/membership" element={<OfferList type="membership" />} />
+          <Route path="/deals/today" element={<OfferList type="todaysDeals" />} />
+          <Route path="/deals/top" element={<OfferList type="topOffers" />} />
+          <Route path="/deals/buy1get1" element={<OfferList type="buy1get1" />} />
+          <Route path="/deals/seasonal" element={<OfferList type="seasonalSales" />} />
+          <Route path="/deals/membership" element={<OfferList type="membership" />} />
           <Route path="/deals" element={<Deals />} /> 
-<Route path="/offer/:type/:id" element={<OfferDetail />} />
+          <Route path="/offer/:type/:id" element={<OfferDetail />} />
 
 
 
           <Route path="/recipes" element={<Recipes />} />
           <Route path="/recipes/quick-easy" element={<QuickEasy />} />
-        <Route path="/recipes/healthy" element={<HealthyChoices />} />
-        <Route path="/recipes/breakfast" element={<BreakfastIdeas />} />
-        <Route path="/recipes/lunch-dinner" element={<LunchDinner />} />
-        <Route path="/recipes/desserts-drinks" element={<DessertsDrinks />} />
+          <Route path="/recipes/healthy" element={<HealthyChoices />} />
+          <Route path="/recipes/breakfast" element={<BreakfastIdeas />} />
+          <Route path="/recipes/lunch-dinner" element={<LunchDinner />} />
+          <Route path="/recipes/desserts-drinks" element={<DessertsDrinks />} />
           <Route path="/recipes/:type/:id" element={<RecipeDetail />} />
           <Route path="/about" element={<About />} />
 
-          <Route
-            path="/checkout"
-            element={
-              <ProtectedRoute>
-                <CheckoutPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/cart"
-            element={
-              <ProtectedRoute>
-                <CartPage />
-              </ProtectedRoute>
-            }
-          />
+
+          <Route path="/about/our-story" element={<OurStory />} />
+          <Route path="/about/contact" element={<ContactUs />} />
+          <Route path="/about/sustainability" element={<Sustainability />} />
+          <Route path="/about/careers" element={<Careers />} />
+          <Route path="/about/faq" element={<FAQSupport />} />
+
+
+          <Route path="/checkout" element={ <ProtectedRoute><CheckoutPage /></ProtectedRoute>}/>
+          <Route path="/cart" element={<ProtectedRoute><CartPage /></ProtectedRoute>}/>
           <Route path="/account" element={<AccountPage />} />
 
           <Route path="/signup" element={<Signup />} />
@@ -97,8 +89,8 @@ export default function App() {
         </Route>
 
         {/* Admin panel routes */}
-        <Route path="/admin/*" element={<AdminRoutes />} />
-        <Route path="/dashboard" element={<AdminRoutes />} />
+          <Route path="/admin/*" element={<AdminRoutes />} />
+          <Route path="/dashboard" element={<AdminRoutes />} />
       </Routes>
 
       {/* Toaster notifications */}

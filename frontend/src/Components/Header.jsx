@@ -79,10 +79,10 @@ export default function Header() {
           onMouseEnter={() => setDealsOpen(true)}
           onMouseLeave={() => setDealsOpen(false)}
         >
-          <Link to="/deals" className="flex items-center space-x-1 hover:text-green-600">
+          <div className="flex items-center space-x-1 hover:text-green-600">
             <span>Deals</span>
             <ChevronDown className="w-4 h-4" />
-          </Link>
+          </div>
           {dealsOpen && (
             <div className="absolute top-full left-0 w-60 bg-white shadow-lg border rounded p-4 z-50">
               <Link to="/deals/today" className="block py-1 hover:text-green-600">Today's Deals</Link>
@@ -100,10 +100,10 @@ export default function Header() {
           onMouseEnter={() => setRecipesOpen(true)}
           onMouseLeave={() => setRecipesOpen(false)}
         >
-          <Link to="/recipes" className="flex items-center space-x-1 hover:text-green-600">
+          <div  className="flex items-center space-x-1 hover:text-green-600">
             <span>Recipes</span>
             <ChevronDown className="w-4 h-4" />
-          </Link>
+          </div>
           {recipesOpen && (
             <div className="absolute top-full left-0 w-60 bg-white shadow-lg border rounded p-4 z-50">
               <Link to="/recipes/quick-easy" className="block py-1 hover:text-green-600">Quick & Easy</Link>
@@ -121,10 +121,10 @@ export default function Header() {
           onMouseEnter={() => setAboutOpen(true)}
           onMouseLeave={() => setAboutOpen(false)}
         >
-          <Link to="/about" className="flex items-center space-x-1 hover:text-green-600">
+          <div className="flex items-center space-x-1 hover:text-green-600">
             <span>About</span>
             <ChevronDown className="w-4 h-4" />
-          </Link>
+          </div>
           {aboutOpen && (
             <div className="absolute top-full left-0 w-60 bg-white shadow-lg border rounded p-4 z-50">
               <Link to="/about/our-story" className="block py-1 hover:text-green-600">Our Story</Link>
