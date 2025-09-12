@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { FaStar, FaShoppingCart } from "react-icons/fa";
-import SidebarFilters from "../Components/SidebarFilters";
+import SidebarFilters from "../SidebarFilters";
 import toast from "react-hot-toast";
 
 const dummyData = {

@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { FaShoppingCart } from "react-icons/fa";
-import { dummyOffers } from "../data/dummyOffers";
+import { dummyOffers } from "../../data/dummyOffers";
 
 export default function OfferList({ type }) {
   const [offers, setOffers] = useState([]);

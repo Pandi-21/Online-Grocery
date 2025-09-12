@@ -8,20 +8,31 @@ import Deals from "./Pages/Deals";
 import Recipes from "./Pages/Recipes";
 import About from "./Pages/About";
 import UserLayout from "./layout/UserLayout";
-import ProductList from "./Pages/ProductList"; 
-import ProductDetails from "./Pages/ProductDetails";
+import ProductList from "./Components/Product/ProductList";
+import ProductDetails from "./Components/Product/ProductDetails"; 
 import CheckoutPage from "./Pages/CheckoutPage";
 import CartPage from "./Pages/CartPage";
 import Signup from "./Pages/Signup";
 import Login from "./Pages/Login";
+import OfferDetail from "./Components/Deals/OfferDetail";
+import OfferList from "./Components/Deals/OfferList";
 
-import OfferList from './Components/OfferList';
+ 
 
 import { AuthProvider } from "./context/AuthContext";
 import ProtectedRoute from "./Components/ProtectedRoute";
 import AccountPage from "./Components/AccountPage";
 import AdminRoutes from "./admin/AdminRoutes";
-import OfferDetail from "./Components/OfferDetail";
+
+import QuickEasy from "./Components/Receipes/QuickEasy";
+import HealthyChoices from "./Components/Receipes/HealthyChoices";
+import BreakfastIdeas from "./Components/Receipes/BreakfastIdeas";
+import LunchDinner from "./Components/Receipes/LunchDinner";
+import DessertsDrinks from "./Components/Receipes/DessertsDrinks";
+import RecipeDetail from "./Components/Receipes/RecipeDetail";
+ 
+
+
 
 export default function App() {
   return (
@@ -54,6 +65,12 @@ export default function App() {
 
 
           <Route path="/recipes" element={<Recipes />} />
+          <Route path="/recipes/quick-easy" element={<QuickEasy />} />
+        <Route path="/recipes/healthy" element={<HealthyChoices />} />
+        <Route path="/recipes/breakfast" element={<BreakfastIdeas />} />
+        <Route path="/recipes/lunch-dinner" element={<LunchDinner />} />
+        <Route path="/recipes/desserts-drinks" element={<DessertsDrinks />} />
+          <Route path="/recipes/:type/:id" element={<RecipeDetail />} />
           <Route path="/about" element={<About />} />
 
           <Route
