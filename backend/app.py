@@ -1,30 +1,34 @@
 from flask import Flask
 from flask_cors import CORS
-from config import Config
+from flask_pymongo import PyMongo
+from config import MONGO_URI
 
-def create_app():
-    app = Flask(__name__)
-    app.config.from_object(Config)
-    CORS(app)
+# Import Blueprints
+from routes.categories import categories_bp
+from routes.subcategories import subcategories_bp
+from routes.items import items_bp
+from routes.products import products_bp
 
-    # import blueprints
-    from routes.products import products_bp
-    from routes.users import users_bp
-    # from routes.categories import categories_bp
-    # from routes.orders import orders_bp
-    # from routes.coupons import coupons_bp
+app = Flask(__name__)
+CORS(app)
 
-    # register blueprints
-    app.register_blueprint(products_bp, url_prefix="/api/products")
-    app.register_blueprint(users_bp, url_prefix="/api/users")
-    # app.register_blueprint(categories_bp, url_prefix="/api/categories")
-    # app.register_blueprint(orders_bp, url_prefix="/api/orders")
-    # app.register_blueprint(coupons_bp, url_prefix="/api/coupons")
+# ✅ Setup MongoDB with Flask-PyMongo
+app.config["MONGO_URI"] = MONGO_URI
+mongo = PyMongo(app)
 
-    return app
+# ✅ Attach mongo to app context so blueprints can use it
+app.mongo = mongo
+app.db = mongo.db   # <-- shortcut: use app.db to access collections
 
-# only run the app if this file is executed directly
+# ✅ Register Blueprints
+app.register_blueprint(categories_bp)
+app.register_blueprint(subcategories_bp)
+app.register_blueprint(items_bp)
+app.register_blueprint(products_bp)
+
+@app.route("/")
+def home():
+    return {"message": "🚀 Backend running with Flask & MongoDB!"}
+
 if __name__ == "__main__":
-    # disable reloader to prevent WinError 10038
-    app = create_app()
-    app.run(debug=True, use_reloader=False)
+    app.run(debug=True)

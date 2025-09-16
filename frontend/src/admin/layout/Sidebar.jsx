@@ -7,9 +7,9 @@ export default function Sidebar() {
   const links = [
     { to: "/admin", label: "Dashboard", icon: LayoutDashboard },
     { to: "/admin/products", label: "Products", icon: Package },
-    { to: "/admin/categories", label: "Categories", icon: List },
+     
     { to: "/admin/orders", label: "Orders", icon: ShoppingCart },
-    { to: "/admin/users", label: "Users", icon: Users },
+     
     { to: "/admin/coupons", label: "Coupons", icon: TicketPercent },
     { to: "/admin/reports", label: "Reports", icon: BarChart3 },
   ];

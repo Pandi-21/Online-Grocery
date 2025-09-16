@@ -74,25 +74,15 @@ export default function Header() {
         </div>
 
         {/* Deals */}
-        <div
-          className="relative"
-          onMouseEnter={() => setDealsOpen(true)}
-          onMouseLeave={() => setDealsOpen(false)}
-        >
-          <div className="flex items-center space-x-1 hover:text-green-600">
-            <span>Deals</span>
-            <ChevronDown className="w-4 h-4" />
-          </div>
-          {dealsOpen && (
-            <div className="absolute top-full left-0 w-60 bg-white shadow-lg border rounded p-4 z-50">
-              <Link to="/deals/today" className="block py-1 hover:text-green-600">Today's Deals</Link>
-              <Link to="/deals/top" className="block py-1 hover:text-green-600">Top Offers</Link>
-              <Link to="/deals/buy1get1" className="block py-1 hover:text-green-600">Buy 1 Get 1</Link>
-              <Link to="/deals/seasonal" className="block py-1 hover:text-green-600">Seasonal Sales</Link>
-              <Link to="/deals/membership" className="block py-1 hover:text-green-600">Membership / Loyalty Deals</Link>
-            </div>
-          )}
-        </div>
+        <div className="relative">
+  <Link
+    to="/deals"
+    className="flex items-center space-x-1 hover:text-green-600"
+  >
+    <span>Deals</span>
+  </Link>
+</div>
+
 
         {/* Recipes */}
         <div

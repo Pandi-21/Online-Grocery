@@ -14,8 +14,8 @@ import CheckoutPage from "./Pages/CheckoutPage";
 import CartPage from "./Pages/CartPage";
 import Signup from "./Pages/Signup";
 import Login from "./Pages/Login";
-import OfferDetail from "./Components/Deals/OfferDetail";
-import OfferList from "./Components/Deals/OfferList";
+// import OfferDetail from "./Components/Deals/OfferDetail";
+// import OfferList from "./Components/Deals/OfferList";
 
  
 
@@ -35,6 +35,7 @@ import ContactUs from "./Components/About/ContactUs";
 import Sustainability from "./Components/About/Sustainability";
 import Careers from "./Components/About/Careers";
 import FAQSupport from "./Components/About/FAQSupport";
+import DealsProduct from "./Components/DealsProduct";
  
 
 
@@ -52,13 +53,15 @@ export default function App() {
           <Route path="/product/:id" element={<ProtectedRoute><ProductDetails /></ProtectedRoute>}/>   
 
           {/* Deals routes */}
-          <Route path="/deals/today" element={<OfferList type="todaysDeals" />} />
+          {/* <Route path="/deals/today" element={<OfferList type="todaysDeals" />} />
           <Route path="/deals/top" element={<OfferList type="topOffers" />} />
           <Route path="/deals/buy1get1" element={<OfferList type="buy1get1" />} />
           <Route path="/deals/seasonal" element={<OfferList type="seasonalSales" />} />
           <Route path="/deals/membership" element={<OfferList type="membership" />} />
           <Route path="/deals" element={<Deals />} /> 
-          <Route path="/offer/:type/:id" element={<OfferDetail />} />
+          <Route path="/offer/:type/:id" element={<OfferDetail />} /> */}
+          <Route path= "/deals" element={<Deals />} />
+           <Route path="/deals/:id" element={<DealsProduct />} />
 
 
 

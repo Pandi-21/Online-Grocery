@@ -1,29 +1,22 @@
-from flask import Blueprint, request, jsonify
-from db import db
+from flask import Blueprint, request, jsonify, current_app
+from bson.objectid import ObjectId
 
 categories_bp = Blueprint("categories", __name__)
 
-@categories_bp.route("/", methods=["GET"])
+@categories_bp.route("/categories", methods=["GET"])
 def get_categories():
-    categories = list(db.categories.find())
-    for c in categories:
-        c["_id"] = str(c["_id"])
+    categories = []
+    for cat in current_app.mongo.db.categories.find():
+        categories.append({
+            "_id": str(cat["_id"]),
+            "name": cat["name"]
+        })
     return jsonify(categories)
 
-@categories_bp.route("/", methods=["POST"])
-def add_category():
+@categories_bp.route("/categories", methods=["POST"])
+def create_category():
     data = request.json
-    result = db.categories.insert_one(data)
-    return jsonify({"message": "Category added", "id": str(result.inserted_id)})
-
-@categories_bp.route("/<id>", methods=["PUT"])
-def update_category(id):    
-    data = request.json
-    db.categories.update_one({"_id": id}, {"$set": data})
-    return jsonify({"message": "Category updated"})
-
-@categories_bp.route("/<id>", methods=["DELETE"])
-def delete_category(id):
-    db.categories.delete_one({"_id": id
-)
-    return jsonify({"message": "Category deleted"}) 
+    new_id = current_app.mongo.db.categories.insert_one({
+        "name": data["name"]
+    }).inserted_id
+    return jsonify({"_id": str(new_id), "name": data["name"]}), 201

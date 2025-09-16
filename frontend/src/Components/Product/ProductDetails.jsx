@@ -20,6 +20,7 @@ const dummyData = {
     ],
     category: "fruits",
   },
+  
 };
 
 export default function ProductDetails() {
