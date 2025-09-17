@@ -1,7 +1,50 @@
 import { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import api from "../api/api";
 
-export default function ProductForm({ productId }) {
+const BACKEND_URL = "http://127.0.0.1:5000";
+
+/* ⬇️ Reusable ImageUploader component */
+function ImageUploader({ image, index, onChange, onRemove }) {
+  const isString = typeof image === "string";
+
+  return (
+    <div className="relative rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center h-40 w-full hover:border-blue-400 transition">
+      {image ? (
+        <>
+         <img
+  src={isString ? `${BACKEND_URL}/${image}` : URL.createObjectURL(image)}
+  alt={`product-${index}`}
+            className="absolute inset-0 w-full h-full object-cover rounded-lg"
+          />
+          <button
+            type="button"
+            onClick={() => onRemove(index)}
+            className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-600"
+          >
+            ✕
+          </button>
+        </>
+      ) : (
+        <label className="flex flex-col items-center justify-center cursor-pointer w-full h-full">
+          <span className="text-4xl text-gray-400">+</span>
+          <span className="text-sm text-gray-500">Add Image</span>
+          <input
+            type="file"
+            accept="image/*"
+            onChange={(e) => onChange(index, e.target.files[0])}
+            className="hidden"
+          />
+        </label>
+      )}
+    </div>
+  );
+}
+
+export default function ProductForm() {
+  const { id: productId } = useParams();
+  const navigate = useNavigate();
+
   const [form, setForm] = useState({
     images: [null, null, null],
     category: "",
@@ -13,7 +56,7 @@ export default function ProductForm({ productId }) {
     sizes: [],
     colors: [],
     quantity_options: [],
-    specifications: {}, // 👈 default object
+    specifications: {},
     reviews: [],
   });
 
@@ -21,12 +64,12 @@ export default function ProductForm({ productId }) {
   const [subcategories, setSubcategories] = useState([]);
   const [items, setItems] = useState([]);
 
-  // Fetch categories
+  // fetch categories
   useEffect(() => {
     api.get("/categories").then((res) => setCategories(res.data));
   }, []);
 
-  // Fetch subcategories
+  // fetch subcategories
   useEffect(() => {
     if (form.category) {
       api.get(`/subcategories/${form.category}`).then((res) =>
@@ -37,7 +80,7 @@ export default function ProductForm({ productId }) {
     }
   }, [form.category]);
 
-  // Fetch items
+  // fetch items
   useEffect(() => {
     if (form.subcategory) {
       api.get(`/items/${form.subcategory}`).then((res) => setItems(res.data));
@@ -45,19 +88,50 @@ export default function ProductForm({ productId }) {
     }
   }, [form.subcategory]);
 
-  // Load existing product for editing
-  useEffect(() => {
-    if (productId) {
-      api.get(`/products/${productId}`).then((res) => setForm(res.data));
-    }
-  }, [productId]);
+  // load product for editing
+ useEffect(() => {
+  if (productId) {
+    api.get(`/products/${productId}`).then((res) => {
+      const data = res.data;
+     setForm((prev) => ({
+  ...prev,
+  ...data,
+  category: data.category?._id || data.category || "",
+  subcategory: data.subcategory?._id || data.subcategory || "",
+  item: data.item?._id || data.item || "",
+  images: data.images?.length ? data.images : [null, null, null],
+  sizes: data.sizes || [],
+  colors: data.colors || [],
+  quantity_options: data.quantity_options || [],
+  specifications: data.specifications || {},
+  reviews: data.reviews || [],
+}));
 
-  // Image Handlers
-  const handleImageChange = (i, file) => {
-    const imgs = [...form.images];
-    imgs[i] = file;
-    setForm({ ...form, images: imgs });
-  };
+
+      // fetch subcategories & items for edit
+      if (data.category) {
+        api.get(`/subcategories/${data.category}`).then((res2) => {
+          setSubcategories(res2.data);
+        });
+      }
+      if (data.subcategory) {
+        api.get(`/items/${data.subcategory}`).then((res3) => {
+          setItems(res3.data);
+        });
+      }
+    });
+  }
+}, [productId]);
+
+
+  // image handlers
+ // inside ProductForm
+const handleImageChange = (index, file) => {
+  const newImages = [...form.images];
+  newImages[index] = file;            // store File
+  setForm({ ...form, images: newImages });
+};
+
 
   const removeImage = (i) => {
     const imgs = [...form.images];
@@ -65,7 +139,7 @@ export default function ProductForm({ productId }) {
     setForm({ ...form, images: imgs });
   };
 
-  // Submit handler
+  // submit
   const handleSubmit = async (e) => {
     e.preventDefault();
     const data = new FormData();
@@ -84,9 +158,16 @@ export default function ProductForm({ productId }) {
     );
     data.append("specifications", JSON.stringify(form.specifications));
 
-    form.images.forEach((img, i) => {
-      if (img) data.append(`image_${i}`, img);
-    });
+    
+form.images.forEach((img, i) => {
+  if (img instanceof File) {
+    data.append(`image_${i}`, img);   // 👈 match Flask
+  } else if (typeof img === 'string') {
+    data.append('existingImages[]', img);
+  }
+});
+
+
 
     try {
       if (productId) {
@@ -100,6 +181,7 @@ export default function ProductForm({ productId }) {
         });
         alert("Product created ✅");
       }
+      navigate("/admin/products");
     } catch (err) {
       console.error(err);
       alert("Error saving product ❌");
@@ -117,7 +199,9 @@ export default function ProductForm({ productId }) {
 
       {/* Category */}
       <div>
-        <label className="block text-sm font-medium text-gray-600">Category</label>
+        <label className="block text-sm font-medium text-gray-600">
+          Category
+        </label>
         <select
           className="mt-1 border p-2 w-full rounded-md"
           value={form.category}
@@ -134,7 +218,9 @@ export default function ProductForm({ productId }) {
 
       {/* Subcategory */}
       <div>
-        <label className="block text-sm font-medium text-gray-600">Subcategory</label>
+        <label className="block text-sm font-medium text-gray-600">
+          Subcategory
+        </label>
         <select
           className="mt-1 border p-2 w-full rounded-md"
           value={form.subcategory}
@@ -171,7 +257,9 @@ export default function ProductForm({ productId }) {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* Name */}
         <div>
-          <label className="block text-sm font-medium text-gray-600">Product Name</label>
+          <label className="block text-sm font-medium text-gray-600">
+            Product Name
+          </label>
           <input
             type="text"
             className="mt-1 border p-2 w-full rounded-md"
@@ -190,64 +278,54 @@ export default function ProductForm({ productId }) {
             onChange={(e) => setForm({ ...form, price: e.target.value })}
           />
         </div>
-
-        {/* Sizes */}
-        <DynamicList
-          label="Sizes"
-          values={form.sizes}
-          onAdd={(val) => setForm({ ...form, sizes: [...form.sizes, val] })}
-          onRemove={(idx) =>
-            setForm({
-              ...form,
-              sizes: form.sizes.filter((_, i) => i !== idx),
-            })
-          }
-        />
-
-        {/* Colors */}
-        <DynamicList
-          label="Colors"
-          values={form.colors}
-          onAdd={(val) => setForm({ ...form, colors: [...form.colors, val] })}
-          onRemove={(idx) =>
-            setForm({
-              ...form,
-              colors: form.colors.filter((_, i) => i !== idx),
-            })
-          }
-        />
-
-        {/* Quantity */}
-        <DynamicList
-          label="Quantity Options"
-          values={form.quantity_options}
-          onAdd={(val) =>
-            setForm({
-              ...form,
-              quantity_options: [...form.quantity_options, val],
-            })
-          }
-          onRemove={(idx) =>
-            setForm({
-              ...form,
-              quantity_options: form.quantity_options.filter((_, i) => i !== idx),
-            })
-          }
-        />
       </div>
+
+      {/* Lists */}
+      <DynamicList
+        label="Sizes"
+        values={form.sizes}
+        onAdd={(val) => setForm({ ...form, sizes: [...form.sizes, val] })}
+        onRemove={(idx) =>
+          setForm({ ...form, sizes: form.sizes.filter((_, i) => i !== idx) })
+        }
+      />
+      <DynamicList
+        label="Colors"
+        values={form.colors}
+        onAdd={(val) => setForm({ ...form, colors: [...form.colors, val] })}
+        onRemove={(idx) =>
+          setForm({ ...form, colors: form.colors.filter((_, i) => i !== idx) })
+        }
+      />
+      <DynamicList
+        label="Quantity Options"
+        values={form.quantity_options}
+        onAdd={(val) =>
+          setForm({
+            ...form,
+            quantity_options: [...form.quantity_options, val],
+          })
+        }
+        onRemove={(idx) =>
+          setForm({
+            ...form,
+            quantity_options: form.quantity_options.filter((_, i) => i !== idx),
+          })
+        }
+      />
 
       {/* Description & Specifications */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
-          <label className="block text-sm font-medium text-gray-600">Description</label>
+          <label className="block text-sm font-medium text-gray-600">
+            Description
+          </label>
           <textarea
             className="mt-1 border p-2 w-full rounded-md"
             value={form.description}
             onChange={(e) => setForm({ ...form, description: e.target.value })}
           />
         </div>
-
-        {/* ✅ Specifications with key-value inputs */}
         <DynamicKeyValueList
           label="Specifications"
           values={form.specifications}
@@ -267,33 +345,31 @@ export default function ProductForm({ productId }) {
 
       {/* Images */}
       <div>
-        <label className="block text-sm font-medium text-gray-600">Product Images</label>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-2">
+        <label className="block text-sm font-medium text-gray-600">
+          Product Images
+        </label>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-2">
           {form.images.map((img, i) => (
-            <div
+            <ImageUploader
               key={i}
-              className="relative border rounded-md p-2 flex flex-col items-center"
-            >
-              <input
-                type="file"
-                onChange={(e) => handleImageChange(i, e.target.files[0])}
-              />
-              {img && (
-                <button
-                  type="button"
-                  onClick={() => removeImage(i)}
-                  className="absolute top-1 right-1 text-red-500 text-xs font-bold"
-                >
-                  ✕
-                </button>
-              )}
-            </div>
+              image={img}
+              index={i}
+              onChange={handleImageChange}
+              onRemove={removeImage}
+            />
           ))}
         </div>
       </div>
 
-      {/* Submit */}
-      <div className="text-right">
+      {/* Buttons */}
+      <div className="text-right space-x-3">
+        <button
+          type="button"
+          onClick={() => navigate("/admin/products")}
+          className="bg-gray-300 text-gray-800 px-6 py-2 rounded-md hover:bg-gray-400 transition"
+        >
+          Cancel
+        </button>
         <button
           type="submit"
           className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 transition"
@@ -305,11 +381,11 @@ export default function ProductForm({ productId }) {
   );
 }
 
-// Reusable DynamicList component (for sizes, colors, quantity)
+/* ⬇️ Reusable List Components */
 function DynamicList({ label, values, onAdd, onRemove }) {
   const [input, setInput] = useState("");
   return (
-    <div>
+    <div className="mt-4">
       <label className="block text-sm font-medium text-gray-600">{label}</label>
       <div className="flex gap-2 mt-1">
         <input
@@ -353,7 +429,6 @@ function DynamicList({ label, values, onAdd, onRemove }) {
   );
 }
 
-// ✅ Reusable DynamicKeyValueList component (for specifications)
 function DynamicKeyValueList({ label, values, onAdd, onRemove }) {
   const [keyInput, setKeyInput] = useState("");
   const [valueInput, setValueInput] = useState("");
@@ -390,6 +465,7 @@ function DynamicKeyValueList({ label, values, onAdd, onRemove }) {
           Add
         </button>
       </div>
+      
 
       <ul className="mt-2">
         {Object.entries(values).map(([k, v], idx) => (
@@ -412,4 +488,4 @@ function DynamicKeyValueList({ label, values, onAdd, onRemove }) {
       </ul>
     </div>
   );
-}
+} 
