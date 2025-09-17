@@ -1,5 +1,6 @@
 from flask import Blueprint, request, jsonify, current_app
 from bson.objectid import ObjectId
+from utils import slugify
 
 subcategories_bp = Blueprint("subcategories", __name__)
 
@@ -17,8 +18,10 @@ def get_subcategories(category_id):
 @subcategories_bp.route("/subcategories", methods=["POST"])
 def create_subcategory():
     data = request.json
+    slug = slugify(data["name"])
     new_id = current_app.mongo.db.subcategories.insert_one({
         "name": data["name"],
+        "slug": slug,
         "category_id": ObjectId(data["category_id"])
     }).inserted_id
-    return jsonify({"_id": str(new_id), "name": data["name"]}), 201
+    return jsonify({"_id": str(new_id), "name": data["name"], "slug": slug}), 201

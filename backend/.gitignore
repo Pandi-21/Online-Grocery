@@ -3,4 +3,6 @@
 *.tmp
 
 
-*.uploads
+.env
+uploads
+videos

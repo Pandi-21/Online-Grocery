@@ -20,7 +20,7 @@ export default function AdminRoutes() {
         <Route index element={<Dashboard />} />
          <Route path="products" element={<ProductList />} />
          <Route path="products/new" element={<ProductForm />} />
-         <Route path="products/edit/:id" element={<ProductForm />} />
+         <Route path="products/:id" element={<ProductForm />} />
         
        <Route path="orders" element={<OrderList />} />
     <Route path="orders/:id" element={<OrderDetail />} />
