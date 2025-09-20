@@ -40,8 +40,8 @@ export default function ProductList() {
             <thead className="bg-gray-50">
               <tr>
                 <th className="px-6 py-3 text-left text-sm font-semibold text-gray-600">Name</th>
-                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-600">Category</th>
-                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-600">Subcategory</th>
+                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-600">SubCategory</th>
+                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-600">CategoryItem</th>
                 <th className="px-6 py-3 text-left text-sm font-semibold text-gray-600">Price</th>
                 <th className="px-6 py-3 text-left text-sm font-semibold text-gray-600">Main Image</th>
                 <th className="px-6 py-3 text-right text-sm font-semibold text-gray-600">Actions</th>
@@ -52,8 +52,8 @@ export default function ProductList() {
               {products.map((p) => (
                 <tr key={p._id} className="hover:bg-gray-50 transition">
                   <td className="px-6 py-4 text-gray-800">{p.name}</td>
-                  <td className="px-6 py-4 text-gray-800">{p.category?.name || "—"}</td>
                   <td className="px-6 py-4 text-gray-800">{p.subcategory?.name || "—"}</td>
+                  <td className="px-6 py-4 text-gray-800">{p.item?.name || "—"}</td>
                   <td className="px-6 py-4 text-gray-800">₹{p.price}</td>
                   <td className="px-6 py-4">
                     {p.images?.[0] ? (

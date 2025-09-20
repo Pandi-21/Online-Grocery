@@ -11,6 +11,7 @@ def get_subcategories(category_id):
         subs.append({
             "_id": str(sub["_id"]),
             "name": sub["name"],
+            "slug": sub.get("slug", ""),
             "category_id": str(sub["category_id"])
         })
     return jsonify(subs)

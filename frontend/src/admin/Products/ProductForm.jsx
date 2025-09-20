@@ -12,9 +12,9 @@ function ImageUploader({ image, index, onChange, onRemove }) {
     <div className="relative rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center h-40 w-full hover:border-blue-400 transition">
       {image ? (
         <>
-         <img
-  src={isString ? `${BACKEND_URL}/${image}` : URL.createObjectURL(image)}
-  alt={`product-${index}`}
+          <img
+            src={isString ? `${BACKEND_URL}/${image}` : URL.createObjectURL(image)}
+            alt={`product-${index}`}
             className="absolute inset-0 w-full h-full object-cover rounded-lg"
           />
           <button
@@ -58,6 +58,7 @@ export default function ProductForm() {
     quantity_options: [],
     specifications: {},
     reviews: [],
+    tags: [], // ⬅️ added tags
   });
 
   const [categories, setCategories] = useState([]);
@@ -89,49 +90,46 @@ export default function ProductForm() {
   }, [form.subcategory]);
 
   // load product for editing
- useEffect(() => {
-  if (productId) {
-    api.get(`/products/${productId}`).then((res) => {
-      const data = res.data;
-     setForm((prev) => ({
-  ...prev,
-  ...data,
-  category: data.category?._id || data.category || "",
-  subcategory: data.subcategory?._id || data.subcategory || "",
-  item: data.item?._id || data.item || "",
-  images: data.images?.length ? data.images : [null, null, null],
-  sizes: data.sizes || [],
-  colors: data.colors || [],
-  quantity_options: data.quantity_options || [],
-  specifications: data.specifications || {},
-  reviews: data.reviews || [],
-}));
+  useEffect(() => {
+    if (productId) {
+      api.get(`/products/${productId}`).then((res) => {
+        const data = res.data;
+        setForm((prev) => ({
+          ...prev,
+          ...data,
+          category: data.category?._id || data.category || "",
+          subcategory: data.subcategory?._id || data.subcategory || "",
+          item: data.item?._id || data.item || "",
+          images: data.images?.length ? data.images : [null, null, null],
+          sizes: data.sizes || [],
+          colors: data.colors || [],
+          quantity_options: data.quantity_options || [],
+          specifications: data.specifications || {},
+          reviews: data.reviews || [],
+          tags: data.tags || [], // ⬅️ load existing tags
+        }));
 
-
-      // fetch subcategories & items for edit
-      if (data.category) {
-        api.get(`/subcategories/${data.category}`).then((res2) => {
-          setSubcategories(res2.data);
-        });
-      }
-      if (data.subcategory) {
-        api.get(`/items/${data.subcategory}`).then((res3) => {
-          setItems(res3.data);
-        });
-      }
-    });
-  }
-}, [productId]);
-
+        // fetch subcategories & items for edit
+        if (data.category) {
+          api.get(`/subcategories/${data.category}`).then((res2) => {
+            setSubcategories(res2.data);
+          });
+        }
+        if (data.subcategory) {
+          api.get(`/items/${data.subcategory}`).then((res3) => {
+            setItems(res3.data);
+          });
+        }
+      });
+    }
+  }, [productId]);
 
   // image handlers
- // inside ProductForm
-const handleImageChange = (index, file) => {
-  const newImages = [...form.images];
-  newImages[index] = file;            // store File
-  setForm({ ...form, images: newImages });
-};
-
+  const handleImageChange = (index, file) => {
+    const newImages = [...form.images];
+    newImages[index] = file;
+    setForm({ ...form, images: newImages });
+  };
 
   const removeImage = (i) => {
     const imgs = [...form.images];
@@ -153,21 +151,17 @@ const handleImageChange = (index, file) => {
 
     form.sizes.forEach((s) => data.append("sizes[]", s));
     form.colors.forEach((c) => data.append("colors[]", c));
-    form.quantity_options.forEach((q) =>
-      data.append("quantity_options[]", q)
-    );
+    form.quantity_options.forEach((q) => data.append("quantity_options[]", q));
+    form.tags.forEach((t) => data.append("tags[]", t)); // ⬅️ send tags
     data.append("specifications", JSON.stringify(form.specifications));
 
-    
-form.images.forEach((img, i) => {
-  if (img instanceof File) {
-    data.append(`image_${i}`, img);   // 👈 match Flask
-  } else if (typeof img === 'string') {
-    data.append('existingImages[]', img);
-  }
-});
-
-
+    form.images.forEach((img, i) => {
+      if (img instanceof File) {
+        data.append(`image_${i}`, img);
+      } else if (typeof img === "string") {
+        data.append("existingImages[]", img);
+      }
+    });
 
     try {
       if (productId) {
@@ -313,6 +307,36 @@ form.images.forEach((img, i) => {
           })
         }
       />
+
+      {/* Tags */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div>
+          <label className="block text-sm font-medium text-gray-600 mb-1">Tags</label>
+          {["deals", "top_deals", "todays_offer"].map((tag) => (
+            <label key={tag} className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                value={tag}
+                checked={form.tags.includes(tag)}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  setForm((prev) => ({
+                    ...prev,
+                    tags: prev.tags.includes(val)
+                      ? prev.tags.filter((t) => t !== val)
+                      : [...prev.tags, val],
+                  }));
+                }}
+              />
+              {tag === "deals"
+                ? "Deals"
+                : tag === "top_deals"
+                ? "Top Deals"
+                : "Today's Offer"}
+            </label>
+          ))}
+        </div>
+      </div>
 
       {/* Description & Specifications */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -465,7 +489,6 @@ function DynamicKeyValueList({ label, values, onAdd, onRemove }) {
           Add
         </button>
       </div>
-      
 
       <ul className="mt-2">
         {Object.entries(values).map(([k, v], idx) => (
@@ -488,4 +511,4 @@ function DynamicKeyValueList({ label, values, onAdd, onRemove }) {
       </ul>
     </div>
   );
-} 
+}

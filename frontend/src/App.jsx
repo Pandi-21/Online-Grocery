@@ -4,7 +4,7 @@ import { Toaster } from "react-hot-toast";
 
 import Home from "./Pages/Home";
 import Shop from "./Pages/Shop";
-import Deals from "./Pages/Deals";
+ 
 import Recipes from "./Pages/Recipes";
 import About from "./Pages/About";
 import UserLayout from "./layout/UserLayout";
@@ -36,6 +36,8 @@ import Sustainability from "./Components/About/Sustainability";
 import Careers from "./Components/About/Careers";
 import FAQSupport from "./Components/About/FAQSupport";
 import DealsProduct from "./Components/DealsProduct";
+import DealsSection from "./Components/DealsSection";
+import DealsPage from "./Pages/Deals";
  
 
 
@@ -48,9 +50,10 @@ export default function App() {
         <Route element={<UserLayout />}>
           <Route path="/" element={<Home />} />
           <Route path="/shop" element={<Shop />} />
-          <Route path="/productlist/:category" element={<ProductList />} />
+         <Route path="/shop/:subcategorySlug/:itemSlug" element={<ProductList />} />
+<Route path="/shop/:subcategory/:item?/:productSlug" element={<ProductDetails />} />
 
-          <Route path="/product/:id" element={<ProtectedRoute><ProductDetails /></ProtectedRoute>}/>   
+ 
 
           {/* Deals routes */}
           {/* <Route path="/deals/today" element={<OfferList type="todaysDeals" />} />
@@ -60,8 +63,9 @@ export default function App() {
           <Route path="/deals/membership" element={<OfferList type="membership" />} />
           <Route path="/deals" element={<Deals />} /> 
           <Route path="/offer/:type/:id" element={<OfferDetail />} /> */}
-          <Route path= "/deals" element={<Deals />} />
-           <Route path="/deals/:id" element={<DealsProduct />} />
+          <Route path= "/deals" element={<DealsPage />} />
+          <Route path="/deals/:sectionName" element={<DealsSection />} />
+          <Route path="/deals/product/:id" element={<DealsProduct />} />
 
 
 

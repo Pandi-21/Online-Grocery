@@ -11,7 +11,7 @@ def get_items(subcategory_id):
         items.append({
             "_id": str(item["_id"]),
             "name": item["name"],
-            
+            "slug": item.get("slug", ""),
             "subcategory_id": str(item["subcategory_id"]),
             "category_id": str(item["category_id"])
         })

@@ -1,53 +1,87 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
 
-const dealsData = {
-  todays: [
-    { id: 1, name: "Laptop", offerText: "Flat 20% Off", price: 999, image: "https://via.placeholder.com/150", description: "High performance laptop with 16GB RAM and 512GB SSD", specifications: ["16GB RAM", "512GB SSD", "Intel i7"], reviews: [{ id: 1, user: "Alice", text: "Amazing performance!", rating: 5 }] },
-    { id: 2, name: "Shoes", offerText: "Save ₹500", price: 59, image: "https://via.placeholder.com/150", description: "Comfortable running shoes", specifications: ["Size 9-12", "Blue color", "Lightweight"], reviews: [{ id: 2, user: "Bob", text: "Very comfy!", rating: 4 }] },
-  ],
-  top: [
-    { id: 3, name: "Mobile", offerText: "Exchange Offer", price: 499, image: "https://via.placeholder.com/150", description: "Latest smartphone", specifications: ["128GB Storage", "6GB RAM"], reviews: [] },
-    { id: 4, name: "TV", offerText: "EMI Starting ₹999", price: 799, image: "https://via.placeholder.com/150", description: "55 inch Smart TV", specifications: ["4K HDR", "Smart OS"], reviews: [] },
-  ],
-  bogo: [
-    { id: 5, name: "Chocolates", offerText: "Buy 1 Get 1 Free", price: 10, image: "https://via.placeholder.com/150", description: "Delicious chocolate pack", specifications: ["200g Pack"], reviews: [] },
-  ],
-  membership: [
-    { id: 6, name: "Premium Bag", offerText: "Exclusive 30% Off", price: 120, image: "https://via.placeholder.com/150", description: "Premium leather bag", specifications: ["Leather", "Black color"], reviews: [] },
-  ],
-};
+const BACKEND_URL = "http://127.0.0.1:5000";
 
 export default function DealsPage() {
+  const [dealsData, setDealsData] = useState({});
   const navigate = useNavigate();
+
+  const sections = ["todays", "top", "bogo", "membership"];
+
+  useEffect(() => {
+    async function fetchDeals() {
+      try {
+        const dataObj = {};
+        for (const section of sections) {
+          const res = await fetch(`${BACKEND_URL}/products/section/${section}`);
+          if (!res.ok) throw new Error(`Failed to fetch ${section}`);
+          const data = await res.json();
+          dataObj[section] = Array.isArray(data) ? data : [];
+        }
+        setDealsData(dataObj);
+      } catch (err) {
+        console.error("Error fetching deals", err);
+        toast.error("Failed to load deals");
+      }
+    }
+    fetchDeals();
+  }, []);
 
   const DealsSection = ({ title, products }) => (
     <section className="mb-12">
-      <h2 className="text-xl font-bold mb-4">{title}</h2>
+      <h2 className="text-2xl font-bold mb-4">{title}</h2>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        {products.map((p) => (
-          <div key={p.id} className="border p-3 rounded-lg shadow hover:shadow-md">
-            <img src={p.image} alt={p.name} className="w-full h-40 object-cover rounded" />
-            <h3 className="mt-2 font-semibold">{p.name}</h3>
-            <p className="text-sm text-gray-500">{p.offerText}</p>
-            <button
-              className="mt-2 w-full bg-blue-600 text-white py-1 rounded"
-              onClick={() => navigate(`/deals/${p.id}`, { state: { product: p } })}
+        {Array.isArray(products) && products.length > 0 ? (
+          products.map((p) => (
+            <div
+              key={p._id}
+              className="border p-3 rounded-lg shadow hover:shadow-md transition"
             >
-              View Offer
-            </button>
-          </div>
-        ))}
+              {p.images && p.images[0] ? (
+                <img
+                  src={`${BACKEND_URL}/${p.images[0]}`}
+                  alt={p.name}
+                  className="w-full h-40 object-cover rounded"
+                />
+              ) : (
+                <div className="w-full h-40 bg-gray-200 rounded flex items-center justify-center">
+                  No Image
+                </div>
+              )}
+              <h3 className="mt-2 font-semibold">{p.name}</h3>
+              <p className="text-sm text-gray-500">{p.offerText || `$${p.price}`}</p>
+              <button
+                className="mt-2 w-full bg-blue-600 text-white py-1 rounded hover:bg-blue-700"
+                onClick={() =>
+                  navigate(`/deals/product/${p._id}`, { state: { product: p } })
+                }
+              >
+                View Offer
+              </button>
+            </div>
+          ))
+        ) : (
+          <p className="text-gray-500 col-span-full text-center">No products found</p>
+        )}
       </div>
     </section>
   );
 
   return (
     <div className="max-w-6xl mx-auto p-4 space-y-12">
-      <DealsSection title="Today's Deals" products={dealsData.todays} />
-      <DealsSection title="Top Offers" products={dealsData.top} />
-      <DealsSection title="Buy 1 Get 1" products={dealsData.bogo} />
-      <DealsSection title="Membership & Loyalty Deals" products={dealsData.membership} />
+      {Object.keys(dealsData).length === 0 ? (
+        <p className="text-center text-gray-500">Loading deals…</p>
+      ) : (
+        Object.entries(dealsData).map(([sectionName, products]) => (
+          <DealsSection
+            key={sectionName}
+            title={sectionName.replace("_", " ").toUpperCase()}
+            products={products}
+          />
+        ))
+      )}
     </div>
   );
 }

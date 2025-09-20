@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { ShoppingCart, Search, ChevronDown } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import api from "../admin/api/api";
+import api from "../admin/api/api"; // axios instance
 
 export default function Header() {
   const [categories, setCategories] = useState([]);
@@ -15,14 +15,14 @@ export default function Header() {
 
   // Fetch categories from API
   useEffect(() => {
-    const fetchCategories = async () => {
+    async function fetchCategories() {
       try {
         const res = await api.get("/categories");
         setCategories(res.data);
       } catch (err) {
         console.error("Error fetching categories", err);
       }
-    };
+    }
     fetchCategories();
   }, []);
 
@@ -50,25 +50,36 @@ export default function Header() {
             {shopOpen && (
               <div className="absolute left-1/2 -translate-x-1/2 mt-2 bg-white shadow-lg rounded-xl p-6 grid grid-cols-3 gap-8 min-w-[800px] z-50">
                 {categories.length > 0 ? (
-                  categories.map((cat) => (
-                    <div key={cat.slug}>
-                       
-                      {cat.subcategories?.map((sub) => (
-                        <div key={sub.slug} className="mb-3">
+                  categories.map((cat, catIndex) => (
+                    <div key={cat.slug || cat._id || catIndex}>
+                      {cat.subcategories?.map((sub, subIndex) => (
+                        <div
+                          key={sub.slug || sub._id || subIndex}
+                          className="mb-3"
+                        >
                           <h4 className="text-gray-700 font-medium">
                             {sub.name}
                           </h4>
                           <ul className="mt-1 space-y-1">
-                            {sub.items?.map((item) => (
-                              <li key={item.slug}>
-                                <Link
-                                  to={`/${cat.slug}/${sub.slug}/${item.slug}`}
-                                  className="text-sm text-gray-500 hover:text-green-600"
-                                >
-                                  {item.name}
-                                </Link>
-                              </li>
-                            ))}
+                            {sub.items?.map((item, itemIndex) => {
+                              const catSlug = cat.slug || cat._id || "";
+                              const subSlug = sub.slug || sub._id || "";
+                              const itemSlug = item.slug || item._id || "";
+
+                              return (
+                                <li key={itemSlug || itemIndex}>
+                                 <Link
+  // This matches your route:
+  // /shop/:subcategorySlug/:itemSlug
+  to={`/shop/${subSlug}/${itemSlug}`}
+  className="text-sm text-gray-500 hover:text-green-600"
+>
+  {item.name}
+</Link>
+
+                                </li>
+                              );
+                            })}
                           </ul>
                         </div>
                       ))}
@@ -97,11 +108,36 @@ export default function Header() {
             </button>
             {recipesOpen && (
               <div className="absolute top-full left-0 mt-2 w-60 bg-white shadow-lg border rounded p-4 z-50">
-                <Link to="/recipes/quick-easy" className="block py-1 hover:text-green-600">Quick & Easy</Link>
-                <Link to="/recipes/healthy" className="block py-1 hover:text-green-600">Healthy Choices</Link>
-                <Link to="/recipes/breakfast" className="block py-1 hover:text-green-600">Breakfast Ideas</Link>
-                <Link to="/recipes/lunch-dinner" className="block py-1 hover:text-green-600">Lunch & Dinner</Link>
-                <Link to="/recipes/desserts-drinks" className="block py-1 hover:text-green-600">Desserts & Drinks</Link>
+                <Link
+                  to="/recipes/quick-easy"
+                  className="block py-1 hover:text-green-600"
+                >
+                  Quick & Easy
+                </Link>
+                <Link
+                  to="/recipes/healthy"
+                  className="block py-1 hover:text-green-600"
+                >
+                  Healthy Choices
+                </Link>
+                <Link
+                  to="/recipes/breakfast"
+                  className="block py-1 hover:text-green-600"
+                >
+                  Breakfast Ideas
+                </Link>
+                <Link
+                  to="/recipes/lunch-dinner"
+                  className="block py-1 hover:text-green-600"
+                >
+                  Lunch & Dinner
+                </Link>
+                <Link
+                  to="/recipes/desserts-drinks"
+                  className="block py-1 hover:text-green-600"
+                >
+                  Desserts & Drinks
+                </Link>
               </div>
             )}
           </div>
@@ -117,11 +153,36 @@ export default function Header() {
             </button>
             {aboutOpen && (
               <div className="absolute top-full left-0 mt-2 w-60 bg-white shadow-lg border rounded p-4 z-50">
-                <Link to="/about/our-story" className="block py-1 hover:text-green-600">Our Story</Link>
-                <Link to="/about/contact" className="block py-1 hover:text-green-600">Contact Us</Link>
-                <Link to="/about/sustainability" className="block py-1 hover:text-green-600">Sustainability</Link>
-                <Link to="/about/careers" className="block py-1 hover:text-green-600">Careers</Link>
-                <Link to="/about/faq" className="block py-1 hover:text-green-600">FAQ & Support</Link>
+                <Link
+                  to="/about/our-story"
+                  className="block py-1 hover:text-green-600"
+                >
+                  Our Story
+                </Link>
+                <Link
+                  to="/about/contact"
+                  className="block py-1 hover:text-green-600"
+                >
+                  Contact Us
+                </Link>
+                <Link
+                  to="/about/sustainability"
+                  className="block py-1 hover:text-green-600"
+                >
+                  Sustainability
+                </Link>
+                <Link
+                  to="/about/careers"
+                  className="block py-1 hover:text-green-600"
+                >
+                  Careers
+                </Link>
+                <Link
+                  to="/about/faq"
+                  className="block py-1 hover:text-green-600"
+                >
+                  FAQ & Support
+                </Link>
               </div>
             )}
           </div>

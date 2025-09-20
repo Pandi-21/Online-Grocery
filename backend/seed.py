@@ -1,14 +1,24 @@
 from flask import Flask
 from flask_pymongo import PyMongo
 from bson.objectid import ObjectId
-import re   # for slugify
+import re
+import unicodedata
 
 app = Flask(__name__)
 app.config["MONGO_URI"] = "mongodb://localhost:27017/myshop"
 mongo = PyMongo(app)
 
+# ✅ Slugify that handles unicode, punctuation, spaces etc.
 def slugify(text: str) -> str:
-    return re.sub(r"\s+", "-", text.strip().lower())
+    # normalize unicode characters (accents, etc.)
+    text = unicodedata.normalize('NFKD', text).encode('ascii', 'ignore').decode('ascii')
+    # lowercase
+    text = text.lower()
+    # replace non-alphanumeric sequences with hyphen
+    text = re.sub(r'[^a-z0-9]+', '-', text)
+    # remove leading/trailing hyphens
+    text = text.strip('-')
+    return text
 
 def seed_data():
     categories = [
@@ -23,10 +33,10 @@ def seed_data():
     ]
 
     items = [
-        {"name": "Fresh Fruits",  "subcategory_name": "Fruits & Vegetables"},
+        {"name": "Fresh Fruits", "subcategory_name": "Fruits & Vegetables"},
         {"name": "Fresh Vegetables", "subcategory_name": "Fruits & Vegetables"},
-        {"name": "Organic Produce",  "subcategory_name": "Fruits & Vegetables"},
-        {"name": "Exotic Fruits",  "subcategory_name": "Fruits & Vegetables"},
+        {"name": "Organic Produce", "subcategory_name": "Fruits & Vegetables"},
+        {"name": "Exotic Fruits", "subcategory_name": "Fruits & Vegetables"},
         {"name": "Seasonal Picks", "subcategory_name": "Fruits & Vegetables"},
         {"name": "Milk, Curd & Paneer", "subcategory_name": "Diary & Bakery"},
         {"name": "Cheese & Butter", "subcategory_name": "Diary & Bakery"},
@@ -35,7 +45,7 @@ def seed_data():
         {"name": "Cakes & Pastries", "subcategory_name": "Diary & Bakery"},
     ]
 
-    # Insert categories
+    # Insert categories with slug
     for cat in categories:
         if not mongo.db.categories.find_one({"name": cat["name"]}):
             mongo.db.categories.insert_one({
@@ -43,7 +53,7 @@ def seed_data():
                 "slug": slugify(cat["name"])
             })
 
-    # Insert subcategories
+    # Insert subcategories with slug
     for sub in subcategories:
         parent = mongo.db.categories.find_one({"name": sub["category_name"]})
         if parent and not mongo.db.subcategories.find_one({"name": sub["name"], "category_id": parent["_id"]}):
@@ -53,7 +63,7 @@ def seed_data():
                 "category_id": parent["_id"]
             })
 
-    # Insert items
+    # Insert items with slug
     for item in items:
         parent_sub = mongo.db.subcategories.find_one({"name": item["subcategory_name"]})
         if parent_sub and not mongo.db.items.find_one({"name": item["name"], "subcategory_id": parent_sub["_id"]}):
@@ -68,5 +78,5 @@ def seed_data():
 
 if __name__ == "__main__":
     with app.app_context():
-        seed_data()   # only runs when you python app.py
+        seed_data()   # run seeding first time
     app.run(debug=True)
