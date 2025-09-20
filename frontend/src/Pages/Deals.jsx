@@ -41,10 +41,11 @@ export default function DealsPage() {
             >
               {p.images && p.images[0] ? (
                 <img
-                  src={`${BACKEND_URL}/${p.images[0]}`}
-                  alt={p.name}
-                  className="w-full h-40 object-cover rounded"
-                />
+  src={`${BACKEND_URL}/uploads/${p.images[0]}`}
+  alt={p.name}
+  className="w-full h-40 object-cover rounded"
+/>
+
               ) : (
                 <div className="w-full h-40 bg-gray-200 rounded flex items-center justify-center">
                   No Image

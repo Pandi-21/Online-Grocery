@@ -1,8 +1,9 @@
- 
+# Log and temp files
 *.log
 *.tmp
 
-
+# Environment file
 .env
+
+# Uploads and videos folder
 uploads
-videos

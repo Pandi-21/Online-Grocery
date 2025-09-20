@@ -35,7 +35,8 @@ export default function DealsProduct() {
   // Update main image when product loads
   useEffect(() => {
     if (product?.images && product.images[0]) {
-      setMainImage(`${BACKEND_URL}/${product.images[0]}`);
+      setMainImage(`${BACKEND_URL}/uploads/${product.images[0]}`);
+
     }
   }, [product]);
 
@@ -78,15 +79,16 @@ export default function DealsProduct() {
           {product.images && product.images.length > 0 && (
             <div className="flex gap-4">
               {product.images.map((img, idx) => (
-                <img
-                  key={idx}
-                  src={`${BACKEND_URL}/${img}`}
-                  alt={`thumbnail ${idx}`}
-                  onClick={() => setMainImage(`${BACKEND_URL}/${img}`)}
-                  className={`w-20 h-20 object-cover rounded-md cursor-pointer border-2 ${
-                    mainImage === `${BACKEND_URL}/${img}` ? "border-green-500" : "border-transparent"
-                  }`}
-                />
+              <img
+  key={idx}
+  src={`${BACKEND_URL}/uploads/${img}`}
+  alt={`thumbnail ${idx}`}
+  onClick={() => setMainImage(`${BACKEND_URL}/uploads/${img}`)}
+  className={`w-20 h-20 object-cover rounded-md cursor-pointer border-2 ${
+    mainImage === `${BACKEND_URL}/uploads/${img}` ? "border-green-500" : "border-transparent"
+  }`}
+/>
+
               ))}
             </div>
           )}
