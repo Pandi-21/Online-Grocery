@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import api from "../api/api";
+import { API as api } from "../../admin/api/api";
+
 
 const BACKEND_URL = "http://127.0.0.1:5000";
 

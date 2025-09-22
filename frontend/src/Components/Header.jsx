@@ -2,7 +2,10 @@ import React, { useState, useEffect } from "react";
 import { ShoppingCart, Search, ChevronDown } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import api from "../admin/api/api"; // axios instance
+// import api from "../admin/api/api"; // axios instance
+import { API as api } from "../admin/api/api";
+// import { API as api } from "../../admin/api/api";
+
 
 export default function Header() {
   const [categories, setCategories] = useState([]);

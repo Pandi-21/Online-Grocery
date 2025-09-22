@@ -7,6 +7,9 @@ export default function Sidebar() {
   const links = [
     { to: "/admin", label: "Dashboard", icon: LayoutDashboard },
     { to: "/admin/products", label: "Products", icon: Package },
+    
+    { to: "/admin/recipes", label: "Receipes", icon: LayoutDashboard },
+ 
      
     { to: "/admin/orders", label: "Orders", icon: ShoppingCart },
      

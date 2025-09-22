@@ -11,6 +11,8 @@ import CouponList from "./Coupons/CouponList";
  
  
 import ReportPage from "./Reports/ReportPage";
+import RecipesList from "./Receipes/RecipesList";
+import RecipeForm from "./Receipes/RecipeForm";
 
 export default function AdminRoutes() {
   return (
@@ -21,6 +23,11 @@ export default function AdminRoutes() {
          <Route path="products" element={<ProductList />} />
          <Route path="products/new" element={<ProductForm />} />
          <Route path="products/:id" element={<ProductForm />} />
+
+         <Route path="recipes" element={<RecipesList />} />
+        <Route path="recipes/new" element={<RecipeForm />} />
+        <Route path="recipes/edit/:id" element={<RecipeForm />} />
+
         
        <Route path="orders" element={<OrderList />} />
     <Route path="orders/:id" element={<OrderDetail />} />

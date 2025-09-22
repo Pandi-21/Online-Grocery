@@ -1,16 +1,16 @@
 // src/api/api.js
 import axios from "axios";
 
-// Vite exposes env vars via import.meta.env
-const baseURL =
-  import.meta.env.VITE_API_BASE_URL || "http://127.0.0.1:5000";
+// Common backend URL
+const BACKEND_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
 
-const api = axios.create({
-  baseURL,
+// Axios instance
+const API = axios.create({
+  baseURL: BACKEND_URL,
   headers: {
     "Content-Type": "application/json",
   },
 });
 
-// Optional: add interceptors here
-export default api;
+// Export both instance and URL (in case you need raw URL in components)
+export { API, BACKEND_URL };

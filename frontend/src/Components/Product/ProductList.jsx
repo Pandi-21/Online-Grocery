@@ -3,7 +3,8 @@ import { useParams, Link } from "react-router-dom";
 import { FaStar, FaShoppingCart } from "react-icons/fa";
 import SidebarFilters from "../SidebarFilters";
 import toast from "react-hot-toast";
-import api from "../../admin/api/api"; // your axios instance
+import { API as api } from "../../admin/api/api";
+
 
 export default function ProductList() {
  const { subcategorySlug, itemSlug } = useParams();

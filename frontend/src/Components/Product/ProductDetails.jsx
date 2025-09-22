@@ -3,7 +3,8 @@ import { useState, useEffect } from "react";
 import { FaShoppingCart } from "react-icons/fa";
 import toast from "react-hot-toast";
 import RelatedProducts from "./RelatedProducts";
-import api from "../../admin/api/api"; // axios instance
+import { API as api } from "../../admin/api/api";
+
 
 export default function ProductDetails() {
   // match route: /shop/:category/:subcategory/:item/:productSlug
