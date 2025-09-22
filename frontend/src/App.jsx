@@ -5,7 +5,6 @@ import { Toaster } from "react-hot-toast";
 import Home from "./Pages/Home";
 import Shop from "./Pages/Shop";
  
-import Recipes from "./Pages/Recipes";
 import About from "./Pages/About";
 import UserLayout from "./layout/UserLayout";
 import ProductList from "./Components/Product/ProductList";
@@ -23,13 +22,7 @@ import { AuthProvider } from "./context/AuthContext";
 import ProtectedRoute from "./Components/ProtectedRoute";
 import AccountPage from "./Components/AccountPage";
 import AdminRoutes from "./admin/AdminRoutes";
-
-import QuickEasy from "./Components/Receipes/QuickEasy";
-import HealthyChoices from "./Components/Receipes/HealthyChoices";
-import BreakfastIdeas from "./Components/Receipes/BreakfastIdeas";
-import LunchDinner from "./Components/Receipes/LunchDinner";
-import DessertsDrinks from "./Components/Receipes/DessertsDrinks";
-import RecipeDetail from "./Components/Receipes/RecipeDetail";
+ 
 import OurStory from "./Components/About/OurStory";
 import ContactUs from "./Components/About/ContactUs";
 import Sustainability from "./Components/About/Sustainability";
@@ -38,6 +31,8 @@ import FAQSupport from "./Components/About/FAQSupport";
 import DealsProduct from "./Components/DealsProduct";
 import DealsSection from "./Components/DealsSection";
 import DealsPage from "./Pages/Deals";
+import RecipesPage from "./Components/Receipes/RecipesPage";
+import RecipeDetailPage from "./Components/Receipes/RecipeDetail";
  
 
 
@@ -69,16 +64,11 @@ export default function App() {
 
 
 
-          <Route path="/recipes" element={<Recipes />} />
-          <Route path="/recipes/quick-easy" element={<QuickEasy />} />
-          <Route path="/recipes/healthy" element={<HealthyChoices />} />
-          <Route path="/recipes/breakfast" element={<BreakfastIdeas />} />
-          <Route path="/recipes/lunch-dinner" element={<LunchDinner />} />
-          <Route path="/recipes/desserts-drinks" element={<DessertsDrinks />} />
-          <Route path="/recipes/:type/:id" element={<RecipeDetail />} />
+           <Route path="/recipes" element={<RecipesPage />} />
+    <Route path="/recipes/:slug" element={<RecipeDetailPage />} />
+
+
           <Route path="/about" element={<About />} />
-
-
           <Route path="/about/our-story" element={<OurStory />} />
           <Route path="/about/contact" element={<ContactUs />} />
           <Route path="/about/sustainability" element={<Sustainability />} />

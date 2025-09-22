@@ -2,13 +2,11 @@ import React, { useState, useEffect } from "react";
 import { ShoppingCart, Search, ChevronDown } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-// import api from "../admin/api/api"; // axios instance
 import { API as api } from "../admin/api/api";
-// import { API as api } from "../../admin/api/api";
-
 
 export default function Header() {
   const [categories, setCategories] = useState([]);
+  const [recipeItems, setRecipeItems] = useState([]);
   const [shopOpen, setShopOpen] = useState(false);
   const [recipesOpen, setRecipesOpen] = useState(false);
   const [aboutOpen, setAboutOpen] = useState(false);
@@ -16,17 +14,20 @@ export default function Header() {
 
   const { user, logout } = useAuth();
 
-  // Fetch categories from API
+  // Fetch categories (Shop mega menu)
   useEffect(() => {
-    async function fetchCategories() {
-      try {
-        const res = await api.get("/categories");
-        setCategories(res.data);
-      } catch (err) {
-        console.error("Error fetching categories", err);
-      }
-    }
-    fetchCategories();
+    api
+      .get("/categories")
+      .then((res) => setCategories(res.data))
+      .catch((err) => console.error("Error fetching categories", err));
+  }, []);
+
+  // Fetch Recipes items
+  useEffect(() => {
+    api
+      .get("/items?category=recipes") // adjust endpoint if needed
+      .then((res) => setRecipeItems(res.data))
+      .catch((err) => console.error("Error fetching recipe items", err));
   }, []);
 
   return (
@@ -65,21 +66,17 @@ export default function Header() {
                           </h4>
                           <ul className="mt-1 space-y-1">
                             {sub.items?.map((item, itemIndex) => {
-                              const catSlug = cat.slug || cat._id || "";
                               const subSlug = sub.slug || sub._id || "";
                               const itemSlug = item.slug || item._id || "";
 
                               return (
                                 <li key={itemSlug || itemIndex}>
-                                 <Link
-  // This matches your route:
-  // /shop/:subcategorySlug/:itemSlug
-  to={`/shop/${subSlug}/${itemSlug}`}
-  className="text-sm text-gray-500 hover:text-green-600"
->
-  {item.name}
-</Link>
-
+                                  <Link
+                                    to={`/shop/${subSlug}/${itemSlug}`}
+                                    className="text-sm text-gray-500 hover:text-green-600"
+                                  >
+                                    {item.name}
+                                  </Link>
                                 </li>
                               );
                             })}
@@ -100,7 +97,7 @@ export default function Header() {
             Deals
           </Link>
 
-          {/* Recipes Dropdown */}
+          {/* Recipes Dropdown (Dynamic) */}
           <div
             className="relative"
             onMouseEnter={() => setRecipesOpen(true)}
@@ -109,38 +106,18 @@ export default function Header() {
             <button className="flex items-center gap-1 hover:text-green-600">
               Recipes <ChevronDown className="w-4 h-4" />
             </button>
-            {recipesOpen && (
+
+            {recipesOpen && recipeItems.length > 0 && (
               <div className="absolute top-full left-0 mt-2 w-60 bg-white shadow-lg border rounded p-4 z-50">
-                <Link
-                  to="/recipes/quick-easy"
-                  className="block py-1 hover:text-green-600"
-                >
-                  Quick & Easy
-                </Link>
-                <Link
-                  to="/recipes/healthy"
-                  className="block py-1 hover:text-green-600"
-                >
-                  Healthy Choices
-                </Link>
-                <Link
-                  to="/recipes/breakfast"
-                  className="block py-1 hover:text-green-600"
-                >
-                  Breakfast Ideas
-                </Link>
-                <Link
-                  to="/recipes/lunch-dinner"
-                  className="block py-1 hover:text-green-600"
-                >
-                  Lunch & Dinner
-                </Link>
-                <Link
-                  to="/recipes/desserts-drinks"
-                  className="block py-1 hover:text-green-600"
-                >
-                  Desserts & Drinks
-                </Link>
+                {recipeItems.map((item) => (
+                  <Link
+                    key={item._id}
+                    to={`/recipes/${item.slug}`}
+                    className="block py-1 hover:text-green-600"
+                  >
+                    {item.name}
+                  </Link>
+                ))}
               </div>
             )}
           </div>
