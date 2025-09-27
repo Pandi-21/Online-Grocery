@@ -17,22 +17,43 @@ export default function RecipeForm() {
   const [subcategoryId, setSubcategoryId] = useState("");
 
   useEffect(() => {
-    // Load recipe if editing
-    if (id && id !== "new") {
-      getRecipeById(id).then((res) => {
-        const r = res.data;
-        setTitle(r.title || "");
-        setIngredients((r.ingredients || []).join("\n"));
-        setSteps((r.steps || []).join("\n"));
-        setImages(r.images || []);
-        setSubcategoryId(r.subcategory_id || "");
-      });
-    }
+    let recipeData = null;
+    let subResData = [];
 
-    // Load recipe subcategories
-    api.get("/subcategories?category=recipes").then((res) => {
-      setSubcategories(res.data);
-    });
+    const loadData = async () => {
+      try {
+        // fetch recipe (if editing)
+        if (id && id !== "new") {
+          const res = await getRecipeById(id);
+          recipeData = res.data;
+          setTitle(recipeData.title || "");
+          setIngredients((recipeData.ingredients || []).join("\n"));
+          setSteps((recipeData.steps || []).join("\n"));
+          setImages(recipeData.images || []);
+        }
+
+        // fetch subcategories for recipes
+        const subRes = await api.get("/subcategories?category=recipes");
+        subResData = subRes.data;
+        setSubcategories(subResData);
+
+        // map subcategory slug → _id
+        if (recipeData) {
+          if (recipeData.subcategory_id) {
+            setSubcategoryId(recipeData.subcategory_id);
+          } else if (recipeData.subcategory_slug) {
+            const match = subResData.find(
+              (s) => s.slug === recipeData.subcategory_slug
+            );
+            setSubcategoryId(match ? match._id : "");
+          }
+        }
+      } catch (err) {
+        console.error("Error loading recipe form:", err);
+      }
+    };
+
+    loadData();
   }, [id]);
 
   const handleSubmit = async (e) => {
@@ -41,7 +62,7 @@ export default function RecipeForm() {
     formData.append("title", title);
     formData.append("ingredients", ingredients);
     formData.append("steps", steps);
-    formData.append("subcategory_id", subcategoryId); // ✅ send subcategory _id
+    formData.append("subcategory_id", subcategoryId); // send subcategory _id
 
     let fileIndex = 0;
     images.forEach((img) => {
@@ -60,7 +81,7 @@ export default function RecipeForm() {
       } else {
         await createRecipe(formData);
       }
-      navigate("/admin/recipes");
+      navigate("/admin/recipes"); // go back after save
     } catch (err) {
       console.error("Recipe submit error:", err);
       alert("Error saving recipe");
@@ -128,8 +149,15 @@ export default function RecipeForm() {
         {/* Images */}
         <ImageUploader images={images} onChange={setImages} />
 
-        {/* Submit */}
-        <div>
+        {/* Submit & Cancel */}
+        <div className="flex gap-3">
+          <button
+            type="button"
+            onClick={() => navigate("/admin/recipes")}
+            className="bg-gray-300 text-gray-800 px-6 py-2 rounded hover:bg-gray-400"
+          >
+            Cancel
+          </button>
           <button
             type="submit"
             className="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700"
@@ -141,4 +169,3 @@ export default function RecipeForm() {
     </div>
   );
 }
-``

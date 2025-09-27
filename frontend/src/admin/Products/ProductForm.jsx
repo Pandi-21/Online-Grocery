@@ -182,33 +182,42 @@ export default function ProductForm() {
   const [items, setItems] = useState([]);
 
   // fetch categories
-  useEffect(() => {
-    api.get("/categories").then((res) => setCategories(res.data));
-  }, []);
+  // fetch categories – only Shop
+useEffect(() => {
+  api.get("/categories").then((res) => {
+    const shopOnly = res.data.filter(c => c.name === "Shop"); 
+    setCategories(shopOnly);
+  });
+}, []);
+
 
   // fetch subcategories when category changes
-  useEffect(() => {
-    if (form.category) {
-      api.get(`/subcategories/${form.category}`).then((res) => setSubcategories(res.data || []));
-      setForm((prev) => ({ ...prev, subcategory: "", item: "" }));
-      setItems([]);
-    } else {
-      setSubcategories([]);
-      setItems([]);
-      setForm((prev) => ({ ...prev, subcategory: "", item: "" }));
-    }
-  }, [form.category]);
+  // fetch subcategories when category changes
+useEffect(() => {
+  if (form.category) {
+    api.get(`/subcategories?category=${form.category}`).then((res) => setSubcategories(res.data || []));
+    setForm((prev) => ({ ...prev, subcategory: "", item: "" }));
+    setItems([]);
+  } else {
+    setSubcategories([]);
+    setItems([]);
+    setForm((prev) => ({ ...prev, subcategory: "", item: "" }));
+  }
+}, [form.category]);
+
 
   // fetch items when subcategory changes
-  useEffect(() => {
-    if (form.subcategory) {
-      api.get(`/items/${form.subcategory}`).then((res) => setItems(res.data || []));
-      setForm((prev) => ({ ...prev, item: "" }));
-    } else {
-      setItems([]);
-      setForm((prev) => ({ ...prev, item: "" }));
-    }
-  }, [form.subcategory]);
+ // fetch items when subcategory changes
+useEffect(() => {
+  if (form.subcategory) {
+    api.get(`/items?subcategory=${form.subcategory}`).then((res) => setItems(res.data || []));
+    setForm((prev) => ({ ...prev, item: "" }));
+  } else {
+    setItems([]);
+    setForm((prev) => ({ ...prev, item: "" }));
+  }
+}, [form.subcategory]);
+
 
   // load product for editing
   useEffect(() => {
@@ -231,26 +240,28 @@ export default function ProductForm() {
       }));
 
       // fetch subcategories first
-      if (data.category?._id || data.category) {
-        api.get(`/subcategories/${data.category?._id || data.category}`).then((res2) => {
-          setSubcategories(res2.data || []);
-          setForm((prev) => ({
-            ...prev,
-            subcategory: data.subcategory?._id || data.subcategory || "",
-          }));
+     // fetch subcategories first
+if (data.category?._id || data.category) {
+  api.get(`/subcategories?category=${data.category?._id || data.category}`).then((res2) => {
+    setSubcategories(res2.data || []);
+    setForm((prev) => ({
+      ...prev,
+      subcategory: data.subcategory?._id || data.subcategory || "",
+    }));
 
-          // then fetch items if subcategory exists
-          if (data.subcategory?._id || data.subcategory) {
-            api.get(`/items/${data.subcategory?._id || data.subcategory}`).then((res3) => {
-              setItems(res3.data || []);
-              setForm((prev) => ({
-                ...prev,
-                item: data.item?._id || data.item || "",
-              }));
-            });
-          }
-        });
-      }
+    // then fetch items if subcategory exists
+    if (data.subcategory?._id || data.subcategory) {
+      api.get(`/items?subcategory=${data.subcategory?._id || data.subcategory}`).then((res3) => {
+        setItems(res3.data || []);
+        setForm((prev) => ({
+          ...prev,
+          item: data.item?._id || data.item || "",
+        }));
+      });
+    }
+  });
+}
+
     });
   }, [productId]);
 

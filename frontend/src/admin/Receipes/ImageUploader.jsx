@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { Plus } from "lucide-react"; // for + icon (you can also use fontawesome or custom svg)
 
 export default function ImageUploader({ images, onChange }) {
   const handleFileChange = (e) => {
@@ -12,7 +13,7 @@ export default function ImageUploader({ images, onChange }) {
     onChange(newImages);
   };
 
-  // Cleanup object URLs to avoid memory leaks
+  // Cleanup object URLs
   useEffect(() => {
     return () => {
       images.forEach((img) => {
@@ -25,30 +26,25 @@ export default function ImageUploader({ images, onChange }) {
 
   return (
     <div>
-      <label className="block text-sm font-medium mb-1">Images (max 5)</label>
-      <input
-        type="file"
-        multiple
-        accept="image/*"
-        onChange={handleFileChange}
-        className="block w-full text-sm text-gray-500
-        file:mr-4 file:py-2 file:px-4
-        file:rounded file:border-0
-        file:text-sm file:font-semibold
-        file:bg-green-50 file:text-green-700
-        hover:file:bg-green-100"
-      />
-      <div className="mt-3 grid grid-cols-5 gap-2">
+      <label className="block text-sm font-medium mb-2">
+        Product Images*
+      </label>
+
+      <div className="grid grid-cols-5 gap-3">
+        {/* Uploaded Images */}
         {images.map((img, index) => (
-          <div key={index} className="relative">
+          <div
+            key={index}
+            className="relative w-full h-28 flex items-center justify-center border-2 border-dashed rounded-lg bg-gray-50"
+          >
             <img
               src={
                 typeof img === "string"
-                  ? `/recipes/uploads/${img}` // ✅ corrected path for Recipes
+                  ? `/recipes/uploads/${img}`
                   : URL.createObjectURL(img)
               }
               alt=""
-              className="w-full h-20 object-cover rounded border"
+              className="w-full h-full object-cover rounded-lg"
             />
             <button
               type="button"
@@ -59,6 +55,25 @@ export default function ImageUploader({ images, onChange }) {
             </button>
           </div>
         ))}
+
+        {/* Add Image Slots */}
+        {images.length < 5 &&
+          [...Array(5 - images.length)].map((_, idx) => (
+            <label
+              key={idx}
+              className="w-full h-28 flex flex-col items-center justify-center cursor-pointer border-2 border-dashed rounded-lg text-gray-400 hover:border-green-500 hover:text-green-600 transition"
+            >
+              <Plus className="w-6 h-6 mb-1" />
+              <span className="text-sm">Add Image</span>
+              <input
+                type="file"
+                accept="image/*"
+                multiple
+                className="hidden"
+                onChange={handleFileChange}
+              />
+            </label>
+          ))}
       </div>
     </div>
   );

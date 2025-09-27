@@ -10,7 +10,7 @@ recipes_bp = Blueprint("recipes", __name__, url_prefix="/recipes")
 UPLOAD_DIR = "uploads/recipes"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 ALLOWED_EXT = {"png", "jpg", "jpeg", "gif", "webp"}
-MAX_FILE_SIZE = 6 * 1024 * 1024  # 6 MB
+MAX_FILE_SIZE = 5 * 1024 * 1024  # 6 MB
 
 # ---------- Helpers ----------
 def slugify(text):
@@ -52,15 +52,6 @@ def create_recipe():
     if not parent_sub:
         return jsonify({"error": "invalid subcategory"}), 400
 
-    # Parse lists
-    def parse_list(key):
-        if not data.get(key):
-            return []
-        try:
-            return json.loads(data.get(key))
-        except:
-            return [s.strip() for s in data.get(key).split("\n") if s.strip()]
-
     recipe = {
         "title": title,
         "slug": slugify(title),
@@ -68,9 +59,10 @@ def create_recipe():
         "category_id": parent_sub["category_id"],
         "subcategory": parent_sub["name"],
         "subcategory_id": parent_sub["_id"],
-        "ingredients": parse_list("ingredients"),
-        "steps": parse_list("steps"),
-        "tags": parse_list("tags"),
+        "subcategory_slug": slugify(parent_sub["name"]),
+        "ingredients": parse_list(data, "ingredients"),
+        "steps": parse_list(data, "steps"),
+        "tags": parse_list(data, "tags"),
         "images": [],
         "created_at": datetime.datetime.utcnow(),
         "updated_at": datetime.datetime.utcnow()
@@ -89,14 +81,18 @@ def create_recipe():
 
     res = db.recipes.insert_one(recipe)
     recipe["_id"] = str(res.inserted_id)
+    recipe["subcategory_id"] = str(recipe["subcategory_id"])
+    recipe["category_id"] = str(recipe["category_id"])
+
     return jsonify({"message": "created", "recipe": recipe}), 201
 
-# ---------- List / Filter ----------
+# ---------- List / Filter Recipes ----------
 @recipes_bp.route("", methods=["GET"])
 def list_recipes():
     db = current_app.db
     query = {"category": "Recipes"}
 
+    # Search text
     qtext = request.args.get("q")
     if qtext:
         query["$or"] = [
@@ -104,14 +100,23 @@ def list_recipes():
             {"tags": {"$regex": qtext, "$options": "i"}}
         ]
 
+    # Filter by subcategory slug
+    sub_slug = request.args.get("subcategory")
+    if sub_slug:
+        sub = db.subcategories.find_one({"slug": sub_slug})
+        if sub:
+            query["subcategory_id"] = sub["_id"]
+
     recipes = list(db.recipes.find(query).sort("created_at", -1))
     for r in recipes:
         r["_id"] = str(r["_id"])
+        r["subcategory_id"] = str(r.get("subcategory_id"))
+        r["category_id"] = str(r.get("category_id"))
+        r["subcategory_name"] = r.get("subcategory")
+        r["subcategory_slug"] = r.get("subcategory_slug") or slugify(r.get("subcategory"))
     return jsonify(recipes)
 
-
-
-# ---------- Get by ID ----------
+# ---------- Get Recipe by ID ----------
 @recipes_bp.route("/<id>", methods=["GET"])
 def get_recipe_by_id(id):
     db = current_app.db
@@ -122,9 +127,13 @@ def get_recipe_by_id(id):
     if not r:
         return jsonify({"error": "not found"}), 404
     r["_id"] = str(r["_id"])
+    r["subcategory_id"] = str(r.get("subcategory_id")) if r.get("subcategory_id") else None
+    r["category_id"] = str(r.get("category_id")) if r.get("category_id") else None
+    r["subcategory_name"] = r.get("subcategory")
+    r["subcategory_slug"] = r.get("subcategory_slug") or slugify(r.get("subcategory"))
     return jsonify(r)
 
-# ---------- Get by Slug ----------
+# ---------- Get Recipe by Slug ----------
 @recipes_bp.route("/slug/<slug>", methods=["GET"])
 def get_recipe_by_slug(slug):
     db = current_app.db
@@ -132,6 +141,10 @@ def get_recipe_by_slug(slug):
     if not r:
         return jsonify({"error": "not found"}), 404
     r["_id"] = str(r["_id"])
+    r["subcategory_id"] = str(r.get("subcategory_id")) if r.get("subcategory_id") else None
+    r["category_id"] = str(r.get("category_id")) if r.get("category_id") else None
+    r["subcategory_name"] = r.get("subcategory")
+    r["subcategory_slug"] = r.get("subcategory_slug") or slugify(r.get("subcategory"))
     return jsonify(r)
 
 # ---------- Update Recipe ----------
@@ -149,7 +162,7 @@ def update_recipe(id):
     update = {}
 
     if data.get("title"):
-        update["title"] = data.get("title")
+        update["title"] = data.get("title").strip()
         update["slug"] = slugify(data.get("title"))
 
     # Update subcategory if provided
@@ -159,18 +172,11 @@ def update_recipe(id):
             update["subcategory"] = parent_sub["name"]
             update["subcategory_id"] = parent_sub["_id"]
             update["category_id"] = parent_sub["category_id"]
+            update["subcategory_slug"] = slugify(parent_sub["name"])
 
     # Lists
-    def parse_list(key):
-        if not data.get(key):
-            return None
-        try:
-            return json.loads(data.get(key))
-        except:
-            return [s.strip() for s in data.get(key).split("\n") if s.strip()]
-
     for key in ["ingredients", "steps", "tags"]:
-        val = parse_list(key)
+        val = parse_list(data, key)
         if val is not None:
             update[key] = val
 

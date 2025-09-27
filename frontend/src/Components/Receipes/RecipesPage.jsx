@@ -1,42 +1,56 @@
+import { useParams, Link } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
-import { getRecipes } from "../../admin/api/recipesApi";
+import { getRecipes } from "../../admin/api/recipesApi"; // update your API
 
 export default function RecipesPage() {
+  const { categorySlug } = useParams(); // dynamic category
   const [recipes, setRecipes] = useState([]);
 
   useEffect(() => {
-    getRecipes().then((res) => setRecipes(res.data));
-  }, []);
+    const fetchRecipes = async () => {
+      try {
+        const res = await getRecipes(categorySlug); // pass categorySlug
+        setRecipes(res.data);
+      } catch (err) {
+        console.error("Error fetching recipes:", err);
+      }
+    };
+    fetchRecipes();
+  }, [categorySlug]);
 
   return (
     <div className="p-6 max-w-5xl mx-auto">
-      <h1 className="text-3xl font-bold mb-6">Our Recipes</h1>
+      <h1 className="text-3xl font-bold mb-6">
+        {categorySlug ? `Recipes – ${categorySlug.replace(/-/g, " ")}` : "Our Recipes"}
+      </h1>
+
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-        {recipes.map((recipe) => (
-          <Link
-            key={recipe._id}
-            to={`/recipes/${recipe.slug}`} // public route by slug
-            className="block border rounded-lg overflow-hidden hover:shadow-lg"
-          >
-            {recipe.images?.length > 0 && (
-              <img
-                src={`/recipes/uploads/${recipe.images[0]}`}
-                alt={recipe.title}
-                className="h-48 w-full object-cover"
-              />
-            )}
-            <div className="p-4">
-              <h2 className="text-lg font-semibold">{recipe.title}</h2>
-              {/* optionally show subcategory name */}
-              {recipe.subcategory_name && (
-                <p className="text-sm text-gray-500">
-                  {recipe.subcategory_name}
-                </p>
+        {recipes.length > 0 ? (
+          recipes.map((recipe) => (
+            <Link
+              key={recipe._id}
+              to={`/recipes/${categorySlug}/${recipe.slug}`} // dynamic link
+              className="block border rounded-lg overflow-hidden hover:shadow-lg"
+            >
+              {recipe.images?.length > 0 && (
+                <img
+                  src={`/recipes/uploads/${recipe.images[0]}`}
+                  alt={recipe.title}
+                  className="h-48 w-full object-cover"
+                />
               )}
-            </div>
-          </Link>
-        ))}
+
+              <div className="p-4">
+                <h2 className="text-lg font-semibold">{recipe.title}</h2>
+                {recipe.subcategory && (
+                  <p className="text-sm text-gray-500">{recipe.subcategory}</p>
+                )}
+              </div>
+            </Link>
+          ))
+        ) : (
+          <p className="text-gray-500">No recipes found.</p>
+        )}
       </div>
     </div>
   );

@@ -3,10 +3,12 @@ import { API } from "./api";
 // -------- Recipes APIs --------
 
 // Get all recipes (with optional filters/pagination)
-export const getRecipes = (params = {}) => {
-  return API.get("/recipes", { params });
+export const getRecipes = (subcategorySlug) => {
+  if (subcategorySlug) {
+    return API.get(`/recipes?subcategory=${subcategorySlug}`);
+  }
+  return API.get("/recipes");
 };
-
 // Get recipe by ID
 export const getRecipeById = (id) => {
   return API.get(`/recipes/${id}`);

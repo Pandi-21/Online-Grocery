@@ -1,20 +1,37 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import { getRecipeBySlug } from "../../admin/api/recipesApi";
 
-export default function RecipeDetailPage() {
-  const { slug } = useParams();
+export default function RecipeDetail() {
+  const { categorySlug, recipeSlug } = useParams();
   const [recipe, setRecipe] = useState(null);
 
   useEffect(() => {
-    getRecipeBySlug(slug).then((res) => setRecipe(res.data));
-  }, [slug]);
+    const fetchRecipe = async () => {
+      try {
+        const res = await getRecipeBySlug(recipeSlug);
+        setRecipe(res.data);
+      } catch (err) {
+        console.error("Error fetching recipe:", err);
+      }
+    };
+    fetchRecipe();
+  }, [recipeSlug]);
 
   if (!recipe) return <div className="p-6">Loading...</div>;
 
   return (
     <div className="p-6 max-w-3xl mx-auto">
+      {/* Breadcrumb */}
+      <p className="text-sm text-gray-500 mb-2">
+        <Link to={`/recipes/${categorySlug}`} className="hover:underline">
+          {categorySlug.replace(/-/g, " ")}
+        </Link>{" "}
+        / {recipe.title}
+      </p>
+
       <h1 className="text-3xl font-bold mb-4">{recipe.title}</h1>
+
       {recipe.images?.length > 0 && (
         <div className="mb-4 grid grid-cols-1 sm:grid-cols-2 gap-2">
           {recipe.images.map((img, i) => (

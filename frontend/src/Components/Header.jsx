@@ -23,12 +23,14 @@ export default function Header() {
   }, []);
 
   // Fetch Recipes items
-  useEffect(() => {
-    api
-      .get("/items?category=recipes") // adjust endpoint if needed
-      .then((res) => setRecipeItems(res.data))
-      .catch((err) => console.error("Error fetching recipe items", err));
-  }, []);
+ // Fetch Recipes subcategories instead of items
+useEffect(() => {
+  api
+    .get("/subcategories?category=recipes") // new endpoint
+    .then((res) => setRecipeItems(res.data))
+    .catch((err) => console.error("Error fetching recipe subcategories", err));
+}, []);
+
 
   return (
     <header className="border-b bg-white shadow">
@@ -98,29 +100,32 @@ export default function Header() {
           </Link>
 
           {/* Recipes Dropdown (Dynamic) */}
-          <div
-            className="relative"
-            onMouseEnter={() => setRecipesOpen(true)}
-            onMouseLeave={() => setRecipesOpen(false)}
-          >
-            <button className="flex items-center gap-1 hover:text-green-600">
-              Recipes <ChevronDown className="w-4 h-4" />
-            </button>
+{/* Recipes Dropdown */}
+<div
+  className="relative"
+  onMouseEnter={() => setRecipesOpen(true)}
+  onMouseLeave={() => setRecipesOpen(false)}
+>
+  <button className="flex items-center gap-1 hover:text-green-600">
+    Recipes <ChevronDown className="w-4 h-4" />
+  </button>
 
-            {recipesOpen && recipeItems.length > 0 && (
-              <div className="absolute top-full left-0 mt-2 w-60 bg-white shadow-lg border rounded p-4 z-50">
-                {recipeItems.map((item) => (
-                  <Link
-                    key={item._id}
-                    to={`/recipes/${item.slug}`}
-                    className="block py-1 hover:text-green-600"
-                  >
-                    {item.name}
-                  </Link>
-                ))}
-              </div>
-            )}
-          </div>
+  {recipesOpen && recipeItems.length > 0 && (
+    <div className="absolute top-full left-0 mt-2 w-60 bg-white shadow-lg border rounded p-4 z-50">
+      {recipeItems.map((sub) => (
+        <Link
+          key={sub._id}
+          to={`/recipes/${sub.slug}`} // <-- updated
+          className="block py-1 hover:text-green-600"
+        >
+          {sub.name}
+        </Link>
+      ))}
+    </div>
+  )}
+</div>
+
+  
 
           {/* About Dropdown */}
           <div

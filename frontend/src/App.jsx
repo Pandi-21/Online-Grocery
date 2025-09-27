@@ -31,8 +31,11 @@ import FAQSupport from "./Components/About/FAQSupport";
 import DealsProduct from "./Components/DealsProduct";
 import DealsSection from "./Components/DealsSection";
 import DealsPage from "./Pages/Deals";
+ 
+ 
+import RecipeDetail from "./Components/Receipes/RecipeDetail";
+ 
 import RecipesPage from "./Components/Receipes/RecipesPage";
-import RecipeDetailPage from "./Components/Receipes/RecipeDetail";
  
 
 
@@ -63,9 +66,15 @@ export default function App() {
           <Route path="/deals/product/:id" element={<DealsProduct />} />
 
 
-
+{/* 
            <Route path="/recipes" element={<RecipesPage />} />
-    <Route path="/recipes/:slug" element={<RecipeDetailPage />} />
+<Route path="/recipes/category/:slug" element={<RecipesPage />} />
+<Route path="/recipes/detail/:slug" element={<RecipeDetailPage />} /> */}
+<Route path="/recipes/:categorySlug" element={<RecipesPage />} />
+        
+        {/* Recipe detail */}
+        <Route path="/recipes/:categorySlug/:recipeSlug" element={<RecipeDetail />} />
+
 
 
           <Route path="/about" element={<About />} />
