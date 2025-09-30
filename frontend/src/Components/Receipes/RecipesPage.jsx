@@ -1,6 +1,8 @@
 import { useParams, Link } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { getRecipes } from "../../admin/api/recipesApi"; // update your API
+import { getRecipes } from "../../admin/api/recipesApi";
+
+const BACKEND_URL = import.meta.env.VITE_API_URL || "http://localhost:5000"; // update your API
 
 export default function RecipesPage() {
   const { categorySlug } = useParams(); // dynamic category
@@ -21,7 +23,9 @@ export default function RecipesPage() {
   return (
     <div className="p-6 max-w-5xl mx-auto">
       <h1 className="text-3xl font-bold mb-6">
-        {categorySlug ? `Recipes – ${categorySlug.replace(/-/g, " ")}` : "Our Recipes"}
+        {categorySlug
+          ? `Recipes – ${categorySlug.replace(/-/g, " ")}`
+          : "Our Recipes"}
       </h1>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
@@ -34,9 +38,9 @@ export default function RecipesPage() {
             >
               {recipe.images?.length > 0 && (
                 <img
-                  src={`/recipes/uploads/${recipe.images[0]}`}
+                  src={`${BACKEND_URL}/recipes/uploads/${recipe.images[0]}`}
                   alt={recipe.title}
-                  className="h-48 w-full object-cover"
+                  className="w-full h-48 object-cover"
                 />
               )}
 

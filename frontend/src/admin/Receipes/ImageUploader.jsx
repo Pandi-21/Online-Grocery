@@ -1,7 +1,7 @@
 import { useEffect } from "react";
-import { Plus } from "lucide-react"; // for + icon (you can also use fontawesome or custom svg)
+import { Plus } from "lucide-react";
 
-export default function ImageUploader({ images, onChange }) {
+export default function ImageUploader({ images, onChange, backendUrl }) {
   const handleFileChange = (e) => {
     const files = Array.from(e.target.files);
     const newImages = [...images, ...files].slice(0, 5); // max 5
@@ -40,7 +40,7 @@ export default function ImageUploader({ images, onChange }) {
             <img
               src={
                 typeof img === "string"
-                  ? `/recipes/uploads/${img}`
+                  ? `${backendUrl}/recipes/uploads/${img}`
                   : URL.createObjectURL(img)
               }
               alt=""

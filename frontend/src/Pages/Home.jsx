@@ -1,24 +1,39 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-
-const categories = [
-  { name: "Fruits", img: "https://via.placeholder.com/150x150" },
-  { name: "Vegetables", img: "https://via.placeholder.com/150x150" },
-  { name: "Dairy", img: "https://via.placeholder.com/150x150" },
-  { name: "Snacks", img: "https://via.placeholder.com/150x150" },
-  { name: "Beverages", img: "https://via.placeholder.com/150x150" },
-  { name: "Bakery", img: "https://via.placeholder.com/150x150" },
-];
-
-const deals = [
-  { name: "Fresh Apples", price: "$2.99/lb" },
-  { name: "Organic Carrots", price: "$1.49/lb" },
-  { name: "Whole Milk", price: "$3.49/gallon" },
-  { name: "Potato Chips", price: "$2.79/bag" },
-];
+import { API as api } from "../admin/api/api"; // make sure this points to your axios instance
 
 export default function Home() {
   const navigate = useNavigate();
+
+  const [categories, setCategories] = useState([]);
+  const [deals, setDeals] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+
+        // Fetch categories
+        const catRes = await api.get("/categories"); // make sure your backend has this endpoint
+        setCategories(Array.isArray(catRes.data) ? catRes.data : []);
+
+        // Fetch top deals (products with a "deal" tag, for example)
+        const dealRes = await api.get("/products/section/deals"); 
+        setDeals(Array.isArray(dealRes.data) ? dealRes.data : []);
+      } catch (err) {
+        console.error(err);
+        setError("Failed to load data. Please try again later.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
   return (
     <>
       {/* Hero */}
@@ -36,44 +51,63 @@ export default function Home() {
             Get the freshest produce, dairy, and pantry staples delivered straight to your door.
           </p>
           <button
-      className="bg-green-500 hover:bg-green-600 text-white font-semibold px-6 py-3 rounded-full"
-      onClick={() => navigate("/shop")}
-    >
-      Shop Now
-    </button>
+            className="bg-green-500 hover:bg-green-600 text-white font-semibold px-6 py-3 rounded-full"
+            onClick={() => navigate("/shop")}
+          >
+            Shop Now
+          </button>
         </div>
       </section>
 
       {/* Categories */}
       <section className="max-w-6xl mx-auto px-4 py-12">
         <h2 className="text-2xl font-bold text-center mb-8">Shop by Category</h2>
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
-          {categories.map((cat) => (
-            <div key={cat.name} className="text-center">
-              <div className="rounded-lg overflow-hidden">
-                <img src={cat.img} alt={cat.name} className="w-full h-32 object-cover" />
+
+        {loading ? (
+          <p className="text-center text-gray-500">Loading categories...</p>
+        ) : error ? (
+          <p className="text-center text-red-500">{error}</p>
+        ) : (
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
+            {categories.map((cat) => (
+              <div
+                key={cat._id || cat.name}
+                className="text-center cursor-pointer"
+                onClick={() => navigate(`/shop/${cat.slug || cat.name.toLowerCase()}`)}
+              >
+                <div className="rounded-lg overflow-hidden">
+                  <img
+                    src={cat.img || "https://via.placeholder.com/150x150"}
+                    alt={cat.name}
+                    className="w-full h-32 object-cover"
+                  />
+                </div>
+                <p className="mt-2 font-medium">{cat.name}</p>
               </div>
-              <p className="mt-2 font-medium">{cat.name}</p>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </section>
 
       {/* Deals */}
       <section className="bg-gray-50 py-12">
         <h2 className="text-2xl font-bold text-center mb-8">Top Deals</h2>
-        <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 px-4">
-          {deals.map((deal) => (
-            <div key={deal.name} className="bg-white rounded-lg shadow p-4 text-center">
-              <h3 className="font-semibold">{deal.name}</h3>
-              <p className="text-gray-600">{deal.price}</p>
-            </div>
-          ))}
-        </div>
-      </section>
 
-       
-       
+        {loading ? (
+          <p className="text-center text-gray-500">Loading deals...</p>
+        ) : error ? (
+          <p className="text-center text-red-500">{error}</p>
+        ) : (
+          <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 px-4">
+            {deals.map((deal) => (
+              <div key={deal._id || deal.name} className="bg-white rounded-lg shadow p-4 text-center">
+                <h3 className="font-semibold">{deal.name}</h3>
+                <p className="text-gray-600">₹{deal.price}</p>
+              </div>
+            ))}
+          </div>
+        )}
+      </section>
     </>
   );
 }

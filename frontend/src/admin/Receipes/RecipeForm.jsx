@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { getRecipeById, createRecipe, updateRecipe } from "../api/recipesApi";
-import { API as api } from "../api/api"; // rename API to api
-// for subcategories
+import { API as api } from "../api/api";
 import ImageUploader from "./ImageUploader";
+
+const BACKEND_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
 export default function RecipeForm() {
   const { id } = useParams();
@@ -12,16 +13,15 @@ export default function RecipeForm() {
   const [title, setTitle] = useState("");
   const [ingredients, setIngredients] = useState("");
   const [steps, setSteps] = useState("");
-  const [images, setImages] = useState([]);
+  const [images, setImages] = useState([]); // string names or File objects
   const [subcategories, setSubcategories] = useState([]);
   const [subcategoryId, setSubcategoryId] = useState("");
 
   useEffect(() => {
-    let recipeData = null;
-    let subResData = [];
-
     const loadData = async () => {
       try {
+        let recipeData = null;
+
         // fetch recipe (if editing)
         if (id && id !== "new") {
           const res = await getRecipeById(id);
@@ -34,10 +34,9 @@ export default function RecipeForm() {
 
         // fetch subcategories for recipes
         const subRes = await api.get("/subcategories?category=recipes");
-        subResData = subRes.data;
+        const subResData = subRes.data;
         setSubcategories(subResData);
 
-        // map subcategory slug → _id
         if (recipeData) {
           if (recipeData.subcategory_id) {
             setSubcategoryId(recipeData.subcategory_id);
@@ -62,18 +61,20 @@ export default function RecipeForm() {
     formData.append("title", title);
     formData.append("ingredients", ingredients);
     formData.append("steps", steps);
-    formData.append("subcategory_id", subcategoryId); // send subcategory _id
+    formData.append("subcategory_id", subcategoryId);
 
-    let fileIndex = 0;
-    images.forEach((img) => {
-      if (img instanceof File) {
-        if (fileIndex >= 5) return;
-        formData.append(`image_${fileIndex}`, img);
-        fileIndex++;
-      } else {
-        formData.append("existingImages", img);
-      }
-    });
+    // add existing images as JSON
+    const existing = images.filter((img) => typeof img === "string");
+    if (existing.length) {
+      formData.append("existingImages", JSON.stringify(existing));
+    }
+
+    // add new files
+    images
+      .filter((img) => img instanceof File)
+      .forEach((file, idx) => {
+        if (idx < 5) formData.append(`image_${idx}`, file);
+      });
 
     try {
       if (id && id !== "new") {
@@ -147,7 +148,11 @@ export default function RecipeForm() {
         </div>
 
         {/* Images */}
-        <ImageUploader images={images} onChange={setImages} />
+        <ImageUploader
+          images={images}
+          onChange={setImages}
+          backendUrl={BACKEND_URL}
+        />
 
         {/* Submit & Cancel */}
         <div className="flex gap-3">

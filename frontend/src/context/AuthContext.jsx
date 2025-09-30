@@ -6,7 +6,7 @@ const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true); // 👈 added loading
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -14,11 +14,15 @@ export function AuthProvider({ children }) {
     if (savedUser) {
       setUser(JSON.parse(savedUser));
     }
-    setLoading(false); // 👈 done checking
+    setLoading(false);
   }, []);
 
   const signup = (name, email, password) => {
-    const newUser = { name, email };
+    const newUser = { 
+      _id: Date.now().toString(), // 👈 dummy id
+      name, 
+      email 
+    };
     localStorage.setItem("user", JSON.stringify(newUser));
     setUser(newUser);
     navigate("/");
@@ -27,13 +31,18 @@ export function AuthProvider({ children }) {
   const login = (email, password) => {
     const savedUser = JSON.parse(localStorage.getItem("user"));
     if (savedUser && savedUser.email === email) {
+      if (!savedUser._id) {
+        savedUser._id = Date.now().toString();
+        localStorage.setItem("user", JSON.stringify(savedUser));
+      }
       setUser(savedUser);
-      navigate("/"); // 👉 later we can improve this to redirect back
+      navigate("/");
     } else {
       alert("Invalid credentials");
     }
   };
 
+  // ✅ missing logout function
   const logout = () => {
     localStorage.removeItem("user");
     setUser(null);

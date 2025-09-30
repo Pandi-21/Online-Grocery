@@ -24,7 +24,7 @@ def slugify(text):
     text = re.sub(r'[^a-z0-9]+', '-', text)
     return text.strip('-')
 
-# ---------------- CREATE PRODUCT ----------------
+
 # ---------------- CREATE PRODUCT ----------------
 @products_bp.route("", methods=["POST"])
 def create_product():
@@ -32,15 +32,10 @@ def create_product():
         db = current_app.db
         data = request.form
 
-        sub = None
-        item = None
-        if data.get("subcategory"):
-            sub = db.subcategories.find_one({"_id": ObjectId(data.get("subcategory"))})
-        if data.get("item"):
-            item = db.items.find_one({"_id": ObjectId(data.get("item"))})
+        sub = db.subcategories.find_one({"_id": ObjectId(data.get("subcategory"))}) if data.get("subcategory") else None
+        item = db.items.find_one({"_id": ObjectId(data.get("item"))}) if data.get("item") else None
 
-        # Get tags/sections from admin panel
-        tags = data.getlist("tags[]")  # e.g., ["deals", "top_deals"]
+        tags = data.getlist("tags[]")
 
         product = {
             "category": data.get("category"),
@@ -59,7 +54,7 @@ def create_product():
             "specifications": {},
             "reviews": [],
             "images": [],
-            "tags": tags  # <-- NEW
+            "tags": tags
         }
 
         specs_json = data.get("specifications")
@@ -92,28 +87,28 @@ def create_product():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-# ---------------- GET ALL PRODUCTS ----------------
-@products_bp.route("", methods=["GET"])
-def get_products():
-    db = current_app.db
-    products = []
 
-    for p in db.products.find():
+# ---------------- GET PRODUCTS BY SUBCATEGORY + ITEM (Path Params Style) ----------------
+@products_bp.route("/<subcategory_slug>/<item_slug>", methods=["GET"])
+def get_products_by_sub_and_item(subcategory_slug, item_slug):
+    db = current_app.db
+    query = {"subcategory_slug": subcategory_slug, "item_slug": item_slug}
+
+    products = []
+    for p in db.products.find(query):
         p["_id"] = str(p["_id"])
 
-        # fetch category
+        # attach category/subcategory/item info
         if p.get("category"):
             cat = db.categories.find_one({"_id": ObjectId(p["category"])})
             if cat:
                 p["category"] = {"_id": str(cat["_id"]), "name": cat["name"], "slug": cat.get("slug")}
 
-        # fetch subcategory
         if p.get("subcategory"):
             sub = db.subcategories.find_one({"_id": ObjectId(p["subcategory"])})
             if sub:
                 p["subcategory"] = {"_id": str(sub["_id"]), "name": sub["name"], "slug": sub.get("slug")}
 
-        # fetch item
         if p.get("item"):
             item = db.items.find_one({"_id": ObjectId(p["item"])})
             if item:
@@ -123,23 +118,6 @@ def get_products():
 
     return jsonify(products)
 
-# ---------------- FILTER BY SLUG (subcategory/item) ----------------
-@products_bp.route("/filter", methods=["GET"])
-def get_products_by_slug():
-    db = current_app.db
-    sub_slug = request.args.get("subcategorySlug")
-    item_slug = request.args.get("itemSlug")
-
-    query = {}
-    if sub_slug:
-        query["subcategory_slug"] = sub_slug
-    if item_slug:
-        query["item_slug"] = item_slug
-
-    products = list(db.products.find(query))
-    for p in products:
-        p["_id"] = str(p["_id"])
-    return jsonify(products)
 
 # ---------------- GET SINGLE PRODUCT BY SLUG ----------------
 @products_bp.route("/slug/<product_slug>", methods=["GET"])
@@ -151,8 +129,9 @@ def get_product_by_slug_simple(product_slug):
     p["_id"] = str(p["_id"])
     return jsonify(p)
 
+
 # ---------------- GET SINGLE PRODUCT BY ID ----------------
-@products_bp.route("/<id>", methods=["GET"])
+@products_bp.route("/id/<id>", methods=["GET"])
 def get_product_by_id(id):
     db = current_app.db
     try:
@@ -165,35 +144,37 @@ def get_product_by_id(id):
     product["_id"] = str(product["_id"])
     return jsonify(product)
 
-# ---------------- GET SINGLE PRODUCT BY CATEGORY/SUBCATEGORY/SLUG ----------------
-@products_bp.route("/<category_slug>/<subcategory_slug>/<item_slug>/<product_slug>", methods=["GET"])
-def get_product_by_category_item_slug(category_slug, subcategory_slug, item_slug, product_slug):
+
+# ---------------- GET SINGLE PRODUCT BY CATEGORY/SUBCATEGORY/ITEM/SLUG ----------------
+@products_bp.route("/<subcategory_slug>/<item_slug>/<product_slug>", methods=["GET"])
+def get_product_by_sub_item_slug(subcategory_slug, item_slug, product_slug):
     db = current_app.db
     product = db.products.find_one({"slug": product_slug})
     if not product:
         return jsonify({"error": "Product not found"}), 404
-
-    if product.get("category_slug") != category_slug:
-        return jsonify({"error": "Category mismatch"}), 404
-    if product.get("subcategory_slug") != subcategory_slug:
-        return jsonify({"error": "Subcategory mismatch"}), 404
-    if product.get("item_slug", "") != item_slug:
-        return jsonify({"error": "Item mismatch"}), 404
-
+    if product.get("subcategory_slug") != subcategory_slug or product.get("item_slug") != item_slug:
+        return jsonify({"error": "Mismatch"}), 404
     product["_id"] = str(product["_id"])
     return jsonify(product)
+
+@products_bp.route("/search")
+def search_products():
+    q = request.args.get("q", "")
+    db = current_app.db
+    products = list(db.products.find({"name": {"$regex": q, "$options": "i"}}))
+    for p in products:
+        p["_id"] = str(p["_id"])
+    return jsonify(products)
+
+
+
 
 # ---------------- GET PRODUCTS BY SECTION/TAG ----------------
 @products_bp.route("/section/<section_name>", methods=["GET"])
 def get_products_by_section(section_name):
     db = current_app.db
+    products = list(db.products.find({"tags": {"$regex": section_name, "$options": "i"}}))
 
-    # Match tags that contain the section_name (case-insensitive)
-    products = list(
-        db.products.find({"tags": {"$regex": section_name, "$options": "i"}})
-    )
-
-    # Convert _id to string
     for p in products:
         p["_id"] = str(p["_id"])
     
@@ -213,14 +194,11 @@ def update_product(id):
         return jsonify({"error": "Not found"}), 404
 
     data = request.form
-    sub = None
-    item = None
-    if data.get("subcategory"):
-        sub = db.subcategories.find_one({"_id": ObjectId(data.get("subcategory"))})
-    if data.get("item"):
-        item = db.items.find_one({"_id": ObjectId(data.get("item"))})
 
-    tags = data.getlist("tags[]")  # <-- NEW
+    sub = db.subcategories.find_one({"_id": ObjectId(data.get("subcategory"))}) if data.get("subcategory") else None
+    item = db.items.find_one({"_id": ObjectId(data.get("item"))}) if data.get("item") else None
+
+    tags = data.getlist("tags[]")
 
     update = {
         "category": data.get("category"),
@@ -237,7 +215,7 @@ def update_product(id):
         "colors": data.getlist("colors[]"),
         "quantity_options": data.getlist("quantity_options[]"),
         "specifications": {},
-        "tags": tags  # <-- NEW
+        "tags": tags
     }
 
     specs_json = data.get("specifications")
@@ -271,71 +249,6 @@ def update_product(id):
     db.products.update_one({"_id": ObjectId(id)}, {"$set": update})
     return jsonify({"message": "Product updated"})
 
-    db = current_app.db
-    try:
-        product = db.products.find_one({"_id": ObjectId(id)})
-    except InvalidId:
-        return jsonify({"error": "Invalid product ID"}), 400
-
-    if not product:
-        return jsonify({"error": "Not found"}), 404
-
-    data = request.form
-
-    sub = None
-    item = None
-    if data.get("subcategory"):
-        sub = db.subcategories.find_one({"_id": ObjectId(data.get("subcategory"))})
-    if data.get("item"):
-        item = db.items.find_one({"_id": ObjectId(data.get("item"))})
-
-    update = {
-        "category": data.get("category"),
-        "subcategory": data.get("subcategory"),
-        "item": data.get("item"),
-        "name": data.get("name"),
-        "slug": slugify(data.get("name")),
-        "subcategory_slug": sub.get("slug") if sub else "",
-        "item_slug": item.get("slug") if item else "",
-        "category_slug": data.get("category_slug", ""),
-        "price": float(data.get("price", 0)),
-        "description": data.get("description", ""),
-        "sizes": data.getlist("sizes[]"),
-        "colors": data.getlist("colors[]"),
-        "quantity_options": data.getlist("quantity_options[]"),
-        "specifications": {},
-    }
-
-    specs_json = data.get("specifications")
-    if specs_json:
-        try:
-            update["specifications"] = json.loads(specs_json)
-        except Exception:
-            update["specifications"] = {}
-
-    existing_images = data.getlist("existingImages[]")
-    images = existing_images[:]
-
-    for i in range(3):
-        file = request.files.get(f"image_{i}")
-        if file:
-            if not allowed_file(file.filename):
-                return jsonify({"error": "Only image files allowed"}), 400
-            file.seek(0, os.SEEK_END)
-            file_size = file.tell()
-            file.seek(0)
-            if file_size > MAX_FILE_SIZE:
-                return jsonify({"error": "Each image must be ≤5MB"}), 400
-
-            filename = secure_filename(file.filename)
-            path = os.path.join(UPLOAD_FOLDER, filename)
-            file.save(path)
-            images.append(filename)
-
-    update["images"] = images
-
-    db.products.update_one({"_id": ObjectId(id)}, {"$set": update})
-    return jsonify({"message": "Product updated"})
 
 # ---------------- DELETE PRODUCT ----------------
 @products_bp.route("/<id>", methods=["DELETE"])

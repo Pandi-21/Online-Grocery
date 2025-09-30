@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { getRecipeBySlug } from "../../admin/api/recipesApi";
 
+const BACKEND_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+
 export default function RecipeDetail() {
   const { categorySlug, recipeSlug } = useParams();
   const [recipe, setRecipe] = useState(null);
@@ -37,19 +39,19 @@ export default function RecipeDetail() {
           {recipe.images.map((img, i) => (
             <img
               key={i}
-              src={`/recipes/uploads/${img}`}
-              alt={recipe.title}
+              src={`${BACKEND_URL}/recipes/uploads/${img}`}
+              alt={`${recipe.title} image ${i + 1}`}
               className="w-full h-60 object-cover rounded"
             />
           ))}
         </div>
       )}
-
+{/* 
       {recipe.subcategory_name && (
         <p className="text-sm text-gray-500 mb-2">
           Subcategory: {recipe.subcategory_name}
         </p>
-      )}
+      )} */}
 
       <h2 className="text-xl font-semibold mt-4 mb-2">Ingredients</h2>
       <ul className="list-disc list-inside">
