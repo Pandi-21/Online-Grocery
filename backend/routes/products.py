@@ -88,7 +88,34 @@ def create_product():
         return jsonify({"error": str(e)}), 500
 
 
-# ---------------- GET PRODUCTS BY SUBCATEGORY + ITEM (Path Params Style) ----------------
+# ---------------- GET ALL PRODUCTS ----------------
+@products_bp.route("", methods=["GET"])
+def get_all_products():
+    db = current_app.db
+    products = []
+    for p in db.products.find():
+        p["_id"] = str(p["_id"])
+
+        if p.get("category"):
+            cat = db.categories.find_one({"_id": ObjectId(p["category"])})
+            if cat:
+                p["category"] = {"_id": str(cat["_id"]), "name": cat["name"], "slug": cat.get("slug")}
+
+        if p.get("subcategory"):
+            sub = db.subcategories.find_one({"_id": ObjectId(p["subcategory"])})
+            if sub:
+                p["subcategory"] = {"_id": str(sub["_id"]), "name": sub["name"], "slug": sub.get("slug")}
+
+        if p.get("item"):
+            item = db.items.find_one({"_id": ObjectId(p["item"])})
+            if item:
+                p["item"] = {"_id": str(item["_id"]), "name": item["name"], "slug": item.get("slug")}
+
+        products.append(p)
+    return jsonify(products)
+
+
+# ---------------- GET PRODUCTS BY SUBCATEGORY + ITEM ----------------
 @products_bp.route("/<subcategory_slug>/<item_slug>", methods=["GET"])
 def get_products_by_sub_and_item(subcategory_slug, item_slug):
     db = current_app.db
@@ -98,7 +125,6 @@ def get_products_by_sub_and_item(subcategory_slug, item_slug):
     for p in db.products.find(query):
         p["_id"] = str(p["_id"])
 
-        # attach category/subcategory/item info
         if p.get("category"):
             cat = db.categories.find_one({"_id": ObjectId(p["category"])})
             if cat:
@@ -145,7 +171,7 @@ def get_product_by_id(id):
     return jsonify(product)
 
 
-# ---------------- GET SINGLE PRODUCT BY CATEGORY/SUBCATEGORY/ITEM/SLUG ----------------
+# ---------------- GET SINGLE PRODUCT BY SUB/ITEM/SLUG ----------------
 @products_bp.route("/<subcategory_slug>/<item_slug>/<product_slug>", methods=["GET"])
 def get_product_by_sub_item_slug(subcategory_slug, item_slug, product_slug):
     db = current_app.db
@@ -157,6 +183,8 @@ def get_product_by_sub_item_slug(subcategory_slug, item_slug, product_slug):
     product["_id"] = str(product["_id"])
     return jsonify(product)
 
+
+# ---------------- SEARCH PRODUCTS ----------------
 @products_bp.route("/search")
 def search_products():
     q = request.args.get("q", "")
@@ -167,17 +195,13 @@ def search_products():
     return jsonify(products)
 
 
-
-
 # ---------------- GET PRODUCTS BY SECTION/TAG ----------------
 @products_bp.route("/section/<section_name>", methods=["GET"])
 def get_products_by_section(section_name):
     db = current_app.db
     products = list(db.products.find({"tags": {"$regex": section_name, "$options": "i"}}))
-
     for p in products:
         p["_id"] = str(p["_id"])
-    
     return jsonify(products)
 
 

@@ -4,21 +4,39 @@ import { Link } from "react-router-dom";
 
 export default function ProductList() {
   const [products, setProducts] = useState([]);
-  const BACKEND_URL = "http://127.0.0.1:5000";
   const [deleteId, setDeleteId] = useState(null);
+  const BACKEND_URL = "http://127.0.0.1:5000";
 
   useEffect(() => {
     loadProducts();
   }, []);
 
   async function loadProducts() {
-    const data = await getProducts();
-    setProducts(data);
+    try {
+      const data = await getProducts();
+      console.log("Products response:", data);
+
+      // Handle both response formats
+      if (Array.isArray(data)) {
+        setProducts(data);
+      } else if (data.products && Array.isArray(data.products)) {
+        setProducts(data.products);
+      } else {
+        setProducts([]);
+      }
+    } catch (err) {
+      console.error("Failed to load products:", err);
+      setProducts([]);
+    }
   }
 
   async function handleDelete(id) {
-    await deleteProduct(id);
-    loadProducts();
+    try {
+      await deleteProduct(id);
+      loadProducts();
+    } catch (err) {
+      console.error("Delete failed:", err);
+    }
   }
 
   return (

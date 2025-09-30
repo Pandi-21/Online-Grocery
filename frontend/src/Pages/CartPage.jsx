@@ -1,9 +1,11 @@
 // pages/CartPage.jsx
 import React from "react";
 import { useCart } from "../context/CartContext";
+import { useNavigate } from "react-router-dom"; // <-- import this
 
 const CartPage = () => {
   const { cartItems, loading, updateCartItem, removeCartItem } = useCart();
+  const navigate = useNavigate(); // <-- initialize
 
   // Calculate total
   const totalPrice = Array.isArray(cartItems)
@@ -42,27 +44,21 @@ const CartPage = () => {
               <td>{item.product_price || 0}</td>
               <td>
                 <button
-                  onClick={() =>
-                    updateCartItem(item._id, item.quantity - 1)
-                  }
+                  onClick={() => updateCartItem(item._id, item.quantity - 1)}
                   disabled={item.quantity <= 1}
                 >
                   -
                 </button>
                 <span style={{ margin: "0 10px" }}>{item.quantity}</span>
                 <button
-                  onClick={() =>
-                    updateCartItem(item._id, item.quantity + 1)
-                  }
+                  onClick={() => updateCartItem(item._id, item.quantity + 1)}
                 >
                   +
                 </button>
               </td>
               <td>{(item.product_price || 0) * item.quantity}</td>
               <td>
-                <button onClick={() => removeCartItem(item._id)}>
-                  Remove
-                </button>
+                <button onClick={() => removeCartItem(item._id)}>Remove</button>
               </td>
             </tr>
           ))}
@@ -72,7 +68,7 @@ const CartPage = () => {
       <h2 style={{ marginTop: "20px" }}>Total: ₹{totalPrice}</h2>
       <button
         style={{ marginTop: "10px", padding: "10px 20px" }}
-        onClick={() => alert("Proceeding to checkout...")}
+        onClick={() => navigate("/checkout")} // <-- navigate to checkout page
       >
         Checkout
       </button>

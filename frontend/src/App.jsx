@@ -8,7 +8,7 @@ import About from "./Pages/About";
 import UserLayout from "./layout/UserLayout";
 import ProductList from "./Components/Product/ProductList";
 import ProductDetails from "./Components/Product/ProductDetails"; 
-import CheckoutPage from "./Pages/CheckoutPage";
+// import CheckoutPage from "./Pages/CheckoutPage";
 import CartPage from "./Pages/CartPage";
 import Signup from "./Pages/Signup";
 import Login from "./Pages/Login";
@@ -28,6 +28,7 @@ import FAQSupport from "./Components/About/FAQSupport";
 import ProtectedRoute from "./Components/ProtectedRoute";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { CartProvider } from "./context/CartContext";
+import CheckoutPage from "./Pages/CheckoutPage";
 
 // App inner component to use useAuth safely
 function AppInner() {

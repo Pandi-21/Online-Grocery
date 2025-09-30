@@ -4,8 +4,7 @@ import Dashboard from "./pages/Dashboard";
 import ProductList from "./Products/ProductList";
 import ProductForm from "./Products/ProductForm";
  
-import OrderList from "./Orders/OrderList";
-import OrderDetail from "./Orders/OrderDetails";
+ 
 import CouponForm from "./Coupons/CouponForm";
 import CouponList from "./Coupons/CouponList";
  
@@ -13,6 +12,10 @@ import CouponList from "./Coupons/CouponList";
 import ReportPage from "./Reports/ReportPage";
 import RecipesList from "./Receipes/RecipesList";
 import RecipeForm from "./Receipes/RecipeForm";
+import AdminOrders from "./Orders/AdminOrders";
+import AdminOrderDetails from "./Orders/AdminOrderDetails";
+// import AdminOrders from ".//AdminOrders";
+// import AdminOrderDetails from "./Pages/AdminOrderDetails";
 
 export default function AdminRoutes() {
   return (
@@ -29,8 +32,9 @@ export default function AdminRoutes() {
         <Route path="recipes/edit/:id" element={<RecipeForm />} />
 
         
-       <Route path="orders" element={<OrderList />} />
-    <Route path="orders/:id" element={<OrderDetail />} />
+        
+    <Route path="orders" element={<AdminOrders />} />
+<Route path="orders/:id" element={<AdminOrderDetails />} />
     {/* Coupons */}
     <Route path="coupons" element={<CouponList />} />
     <Route path="coupons/new" element={<CouponForm />} />
