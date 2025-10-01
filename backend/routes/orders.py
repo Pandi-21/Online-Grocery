@@ -5,18 +5,17 @@ import datetime
 orders_bp = Blueprint("orders", __name__, url_prefix="/orders")
 
 # ---------------- Create Order ----------------
+# ---------------- Create Order ----------------
 @orders_bp.route("/create", methods=["POST"])
 def create_order():
     db = current_app.db
     data = request.json
 
-    # Validate required fields
     if not data.get("user_id"):
         return jsonify({"error": "Missing user_id"}), 400
     if not data.get("items") or len(data["items"]) == 0:
         return jsonify({"error": "Cart is empty or missing items"}), 400
 
-    # Handle user_id (ObjectId or string fallback)
     user_id = data["user_id"]
     try:
         if isinstance(user_id, str) and len(user_id) == 24:
@@ -26,7 +25,7 @@ def create_order():
     except Exception:
         return jsonify({"error": f"Invalid user_id: {user_id}"}), 400
 
-    # Prepare delivery address safely
+    # prepare delivery address
     delivery_address = {
         "name": data.get("delivery_address", {}).get("name", ""),
         "address": data.get("delivery_address", {}).get("address", ""),
@@ -36,26 +35,33 @@ def create_order():
         "phone": data.get("delivery_address", {}).get("phone", ""),
     }
 
-    # Build order
+    # ✅ Calculate order total
+    total = sum(
+        float(item.get("price", 0)) * int(item.get("quantity", 1))
+        for item in data.get("items", [])
+    )
+
     order = {
         "user_id": user_obj_id,
         "items": data["items"],
         "delivery_address": delivery_address,
         "payment_method": data.get("payment_method", "online"),
         "status": "pending",
+        "total": total,   # ✅ save total
         "created_at": datetime.datetime.utcnow(),
     }
 
-    # Insert safely
     try:
         result = db.orders.insert_one(order)
         return jsonify({
             "message": "Order placed successfully",
-            "order_id": str(result.inserted_id)
+            "order_id": str(result.inserted_id),
+            "total": total
         }), 201
     except Exception as e:
         print("Error creating order:", e)
         return jsonify({"error": "Failed to create order"}), 500
+
 
 
 # ---------------- Get All Orders (Admin) ----------------

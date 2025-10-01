@@ -9,7 +9,7 @@ import CouponForm from "./Coupons/CouponForm";
 import CouponList from "./Coupons/CouponList";
  
  
-import ReportPage from "./Reports/ReportPage";
+// import ReportPage from "./Reports/ReportPage";
 import RecipesList from "./Receipes/RecipesList";
 import RecipeForm from "./Receipes/RecipeForm";
 import AdminOrders from "./Orders/AdminOrders";
@@ -41,8 +41,8 @@ export default function AdminRoutes() {
     <Route path="coupons/edit/:id" element={<CouponForm />} />
    
  
-
-<Route path="reports" element={<ReportPage />} />
+{/* 
+<Route path="reports" element={<ReportPage />} /> */}
          
         </Route>
       </Routes>
