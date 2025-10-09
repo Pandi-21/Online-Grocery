@@ -96,3 +96,21 @@ def remove_from_cart():
         return jsonify({"error": "Invalid cart_id format"}), 400
 
     return jsonify({"message": "Item removed from cart"}), 200
+
+
+# ---------------- Clear Cart ----------------
+@cart_bp.route("/clear", methods=["POST"])
+def clear_cart():
+    db = current_app.db
+    data = request.json
+    user_id = data.get("user_id")
+
+    if not user_id:
+        return jsonify({"error": "Missing user_id"}), 400
+
+    try:
+        db.cart.delete_many({"user_id": str(user_id)})
+    except Exception as e:
+        return jsonify({"error": "Could not clear cart", "details": str(e)}), 500
+
+    return jsonify({"message": "Cart cleared"}), 200

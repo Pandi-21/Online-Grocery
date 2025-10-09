@@ -21,7 +21,7 @@ const CartPage = () => {
 
   return (
     <div style={{ padding: "20px" }}>
-      <h1>🛒 My Cart</h1>
+      <h1> My Cart</h1>
       <table
         border="1"
         cellPadding="10"

@@ -73,7 +73,7 @@ export default function Home() {
               <div
                 key={cat._id || cat.name}
                 className="text-center cursor-pointer"
-                onClick={() => navigate(`/shop/${cat.slug || cat.name.toLowerCase()}`)}
+                onClick={() => navigate(`${cat.slug || cat.name.toLowerCase()}`)}
               >
                 <div className="rounded-lg overflow-hidden">
                   <img

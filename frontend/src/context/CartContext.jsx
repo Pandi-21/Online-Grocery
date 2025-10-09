@@ -1,4 +1,3 @@
-// context/CartContext.jsx
 import { createContext, useContext, useState, useEffect } from "react";
 import axios from "axios";
 import toast from "react-hot-toast";
@@ -56,8 +55,8 @@ export function CartProvider({ children }) {
 
     try {
       await axios.post(`${BASE_URL}/add`, {
-        user_id: user._id,         // ✅ correct key
-        product_id: product._id,   // ✅ correct key
+        user_id: user._id,
+        product_id: product._id,
         quantity,
       });
 
@@ -78,7 +77,6 @@ export function CartProvider({ children }) {
     try {
       await axios.post(`${BASE_URL}/update`, { cart_id: cartId, quantity });
 
-      // Update cart locally
       setCartItems((prev) =>
         prev.map((item) =>
           item._id === cartId ? { ...item, quantity } : item
@@ -106,6 +104,21 @@ export function CartProvider({ children }) {
     }
   };
 
+  // ---------------- Clear Cart ----------------
+  const clearCart = async () => {
+    if (!user?._id) return;
+
+    try {
+      await axios.post(`${BASE_URL}/clear`, { user_id: user._id }); // Optional backend clear
+      setCartItems([]);
+      toast.success("Cart cleared");
+    } catch (err) {
+      console.error("Clear cart error:", err);
+      setCartItems([]);
+      toast.error("Could not clear cart");
+    }
+  };
+
   return (
     <CartContext.Provider
       value={{
@@ -114,6 +127,7 @@ export function CartProvider({ children }) {
         addToCart,
         updateCartItem,
         removeCartItem,
+        clearCart, // ✅ added
       }}
     >
       {children}

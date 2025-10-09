@@ -1,8 +1,9 @@
-// context/AuthContext.jsx
 import { createContext, useContext, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 const AuthContext = createContext();
+const BASE_URL = "http://localhost:5000/user";
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
@@ -11,40 +12,39 @@ export function AuthProvider({ children }) {
 
   useEffect(() => {
     const savedUser = localStorage.getItem("user");
-    if (savedUser) {
-      setUser(JSON.parse(savedUser));
-    }
+    const token = localStorage.getItem("token");
+    if (savedUser && token) setUser(JSON.parse(savedUser));
     setLoading(false);
   }, []);
 
-  const signup = (name, email, password) => {
-    const newUser = { 
-      _id: Date.now().toString(), // 👈 dummy id
-      name, 
-      email 
-    };
-    localStorage.setItem("user", JSON.stringify(newUser));
+  const signup = async (name, email, password) => {
+    const res = await axios.post(`${BASE_URL}/signup`, { name, email, password });
+    const newUser = res.data.user;
+    const token = res.data.token;
     setUser(newUser);
-    navigate("/");
+    localStorage.setItem("user", JSON.stringify(newUser));
+    localStorage.setItem("userId", newUser._id);
+    localStorage.setItem("token", token);
+    navigate("/account");
+    return res.data;
   };
 
-  const login = (email, password) => {
-    const savedUser = JSON.parse(localStorage.getItem("user"));
-    if (savedUser && savedUser.email === email) {
-      if (!savedUser._id) {
-        savedUser._id = Date.now().toString();
-        localStorage.setItem("user", JSON.stringify(savedUser));
-      }
-      setUser(savedUser);
-      navigate("/");
-    } else {
-      alert("Invalid credentials");
-    }
+  const login = async (email, password) => {
+    const res = await axios.post(`${BASE_URL}/login`, { email, password });
+    const loggedInUser = res.data.user;
+    const token = res.data.token;
+    setUser(loggedInUser);
+    localStorage.setItem("user", JSON.stringify(loggedInUser));
+    localStorage.setItem("userId", loggedInUser._id);
+    localStorage.setItem("token", token);
+    navigate("/account");
+    return res.data;
   };
 
-  // ✅ missing logout function
   const logout = () => {
     localStorage.removeItem("user");
+    localStorage.removeItem("userId");
+    localStorage.removeItem("token");
     setUser(null);
     navigate("/login");
   };
