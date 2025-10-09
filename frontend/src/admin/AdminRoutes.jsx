@@ -14,12 +14,14 @@ import RecipesList from "./Receipes/RecipesList";
 import RecipeForm from "./Receipes/RecipeForm";
 import AdminOrders from "./Orders/AdminOrders";
 import AdminOrderDetails from "./Orders/AdminOrderDetails";
+import { OrdersProvider } from "../context/OrdersContext";
+// import { OrdersProvider } from ".../context/OrdersContext";
 // import AdminOrders from ".//AdminOrders";
 // import AdminOrderDetails from "./Pages/AdminOrderDetails";
 
 export default function AdminRoutes() {
   return (
-     
+     <OrdersProvider> 
       <Routes>
         <Route element={<AdminLayout />}> 
         <Route index element={<Dashboard />} />
@@ -46,6 +48,7 @@ export default function AdminRoutes() {
          
         </Route>
       </Routes>
+      </OrdersProvider>
    
   );
 }
