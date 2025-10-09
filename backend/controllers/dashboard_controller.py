@@ -1,6 +1,7 @@
 from flask import current_app
 from utils.response_helper import success_response, error_response
 from utils.helpers import safe_float, safe_int
+from datetime import datetime, timedelta
 
 def dashboard_stats():
     db = current_app.db
@@ -19,8 +20,11 @@ def dashboard_stats():
                     qty = safe_int(item.get("quantity", 1))
                     revenue += price * qty
 
-        # Active users count
-        active_users = len(db.orders.distinct("user_id"))
+        # Active users in last 30 days
+        thirty_days_ago = datetime.utcnow() - timedelta(days=30)
+        active_users = len(
+            db.orders.distinct("user_id", {"created_at": {"$gte": thirty_days_ago}})
+        )
 
         # Low stock items
         product_sample = db.products.find_one({})
@@ -37,6 +41,7 @@ def dashboard_stats():
     except Exception as e:
         print("Dashboard stats error:", e)
         return error_response("Failed to fetch stats", 500)
+
 
 def latest_orders():
     db = current_app.db

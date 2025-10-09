@@ -288,14 +288,17 @@ from controllers.productController import *
 
 products_bp = Blueprint("products", __name__, url_prefix="/products")
 
-products_bp.route("", methods=["POST"])(create_product)
-products_bp.route("", methods=["GET"])(get_all_products)
-products_bp.route("/id/<id>", methods=["GET"])(get_product_by_id)
-products_bp.route("/slug/<slug>", methods=["GET"])(get_product_by_slug)
-products_bp.route("/<id>", methods=["PUT"])(update_product)
-products_bp.route("/<id>", methods=["DELETE"])(delete_product)
-# existing imports and blueprint code
+# ---------- CREATE & READ ----------
+products_bp.route("", methods=["POST"])(create_product)       # Create product
+products_bp.route("", methods=["GET"])(get_all_products)      # Get all products
+products_bp.route("/<id>", methods=["GET"])(get_product_by_id)  # ✅ Get single product by ID
+products_bp.route("/slug/<slug>", methods=["GET"])(get_product_by_slug)  # Get product by slug
 
+# ---------- UPDATE & DELETE ----------
+products_bp.route("/<id>", methods=["PUT"])(update_product)    # Update product
+products_bp.route("/<id>", methods=["DELETE"])(delete_product) # Delete product
+
+# ---------- FILTERS / SPECIAL ROUTES ----------
 products_bp.route("/<subcategory_slug>/<item_slug>", methods=["GET"])(get_products_by_sub_item)
 products_bp.route("/<subcategory_slug>/<item_slug>/<product_slug>", methods=["GET"])(get_product_by_sub_item_slug)
 products_bp.route("/search", methods=["GET"])(search_products)

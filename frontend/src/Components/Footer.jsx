@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 
 export default function Footer() {
   return (
@@ -14,24 +15,28 @@ export default function Footer() {
         <div>
           <h3 className="font-semibold text-white mb-3">Shop</h3>
           <ul className="space-y-1 text-sm">
-            <li><a href="#">Categories</a></li>
-            <li><a href="#">Top Deals</a></li>
-            <li><a href="#">New Arrivals</a></li>
+            <li><Link to="/shop/fruits-vegetables/fresh-fruits">Fruits & Vegetables</Link></li>
+            <li><a href="#">Diary & Bakery</a></li>
+            <li><a href="#">Snacks & Beverages</a></li>
           </ul>
         </div>
         <div>
           <h3 className="font-semibold text-white mb-3">About</h3>
           <ul className="space-y-1 text-sm">
-            <li><a href="#">Our Story</a></li>
-            <li><a href="#">Careers</a></li>
-            <li><a href="#">Contact Us</a></li>
+            <li>  <Link to="/about/our-story">Our Story</Link></li>
+            <li>  <Link to="/about/careers">Careers</Link></li>
+            <li>  <Link to="/about/contact">Contact Us</Link></li>
+
+            
           </ul>
         </div>
         <div>
           <h3 className="font-semibold text-white mb-3">Legal</h3>
           <ul className="space-y-1 text-sm">
-            <li><a href="#">Privacy Policy</a></li>
-            <li><a href="#">Terms of Service</a></li>
+            <li>  <Link to="/about/faq">Privacy Policy</Link></li>
+            <li>  <Link to="/about/faq">Terms of Service</Link></li>
+
+            
           </ul>
         </div>
       </div>

@@ -2,13 +2,12 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { API as api } from "../../admin/api/api";
 
-
 const BACKEND_URL = "http://127.0.0.1:5000";
 
-/* ⬇️ Reusable ImageUploader component */
+/* ⬇️ Reusable ImageUploader */
 function ImageUploader({ image, index, onChange, onRemove }) {
   const isString = typeof image === "string";
-   const imgSrc = isString
+  const imgSrc = isString
     ? image.startsWith("http")
       ? image
       : `${BACKEND_URL}/uploads/${image}`
@@ -17,7 +16,7 @@ function ImageUploader({ image, index, onChange, onRemove }) {
     : null;
 
   return (
- <div className="relative rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center h-40 w-full hover:border-blue-400 transition">
+    <div className="relative rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center h-40 w-full hover:border-blue-400 transition">
       {imgSrc ? (
         <>
           <img
@@ -49,7 +48,7 @@ function ImageUploader({ image, index, onChange, onRemove }) {
   );
 }
 
-/* ⬇️ Reusable List Components */
+/* ⬇️ Dynamic List */
 function DynamicList({ label, values, onAdd, onRemove }) {
   const [input, setInput] = useState("");
   return (
@@ -97,6 +96,7 @@ function DynamicList({ label, values, onAdd, onRemove }) {
   );
 }
 
+/* ⬇️ Dynamic Key-Value List */
 function DynamicKeyValueList({ label, values, onAdd, onRemove }) {
   const [keyInput, setKeyInput] = useState("");
   const [valueInput, setValueInput] = useState("");
@@ -181,91 +181,89 @@ export default function ProductForm() {
   const [subcategories, setSubcategories] = useState([]);
   const [items, setItems] = useState([]);
 
-  // fetch categories
-  // fetch categories – only Shop
-useEffect(() => {
-  api.get("/categories").then((res) => {
-    const shopOnly = res.data.filter(c => c.name === "Shop"); 
-    setCategories(shopOnly);
-  });
-}, []);
+  /* 🟢 Fetch only "Shop" category */
+  useEffect(() => {
+    api.get("/categories").then((res) => {
+      const shopOnly = res.data
+        .filter((c) => c.name === "Shop")
+        .map((c) => ({ ...c, _id: String(c._id) }));
+      setCategories(shopOnly);
+    });
+  }, []);
 
+  /* 🟢 Load subcategories when category changes */
+  useEffect(() => {
+    if (form.category) {
+      api
+        .get(`/subcategories?category=${form.category}`)
+        .then((res) => setSubcategories(res.data.map((s) => ({ ...s, _id: String(s._id) }))));
+    } else {
+      setSubcategories([]);
+      setItems([]);
+    }
+  }, [form.category]);
 
-  // fetch subcategories when category changes
-  // fetch subcategories when category changes
-useEffect(() => {
-  if (form.category) {
-    api.get(`/subcategories?category=${form.category}`).then((res) => setSubcategories(res.data || []));
-    setForm((prev) => ({ ...prev, subcategory: "", item: "" }));
-    setItems([]);
-  } else {
-    setSubcategories([]);
-    setItems([]);
-    setForm((prev) => ({ ...prev, subcategory: "", item: "" }));
-  }
-}, [form.category]);
+  /* 🟢 Load items when subcategory changes */
+  useEffect(() => {
+    if (form.subcategory) {
+      api
+        .get(`/items?subcategory=${form.subcategory}`)
+        .then((res) => setItems(res.data.map((i) => ({ ...i, _id: String(i._id) }))));
+    } else {
+      setItems([]);
+    }
+  }, [form.subcategory]);
 
-
-  // fetch items when subcategory changes
- // fetch items when subcategory changes
-useEffect(() => {
-  if (form.subcategory) {
-    api.get(`/items?subcategory=${form.subcategory}`).then((res) => setItems(res.data || []));
-    setForm((prev) => ({ ...prev, item: "" }));
-  } else {
-    setItems([]);
-    setForm((prev) => ({ ...prev, item: "" }));
-  }
-}, [form.subcategory]);
-
-
-  // load product for editing
+  /* 🟢 Load product for editing */
   useEffect(() => {
     if (!productId) return;
 
-    api.get(`/products/${productId}`).then((res) => {
-      const data = res.data;
+    const fetchProduct = async () => {
+      try {
+        const res = await api.get(`/products/${productId}`);
+        const data = res.data;
 
-      setForm((prev) => ({
-        ...prev,
-        ...data,
-        category: data.category?._id || data.category || "",
-        images: data.images?.length ? data.images : [null, null, null],
-        sizes: data.sizes || [],
-        colors: data.colors || [],
-        quantity_options: data.quantity_options || [],
-        specifications: data.specifications || {},
-        reviews: data.reviews || [],
-        tags: data.tags || [],
-      }));
+        // Convert all IDs to string
+        const categoryId = String(data.category?._id || data.category || "");
+        const subcategoryId = String(data.subcategory?._id || data.subcategory || "");
+        const itemId = String(data.item?._id || data.item || "");
 
-      // fetch subcategories first
-     // fetch subcategories first
-if (data.category?._id || data.category) {
-  api.get(`/subcategories?category=${data.category?._id || data.category}`).then((res2) => {
-    setSubcategories(res2.data || []);
-    setForm((prev) => ({
-      ...prev,
-      subcategory: data.subcategory?._id || data.subcategory || "",
-    }));
-
-    // then fetch items if subcategory exists
-    if (data.subcategory?._id || data.subcategory) {
-      api.get(`/items?subcategory=${data.subcategory?._id || data.subcategory}`).then((res3) => {
-        setItems(res3.data || []);
         setForm((prev) => ({
           ...prev,
-          item: data.item?._id || data.item || "",
+          ...data,
+          category: categoryId,
+          subcategory: subcategoryId,
+          item: itemId,
+          images: data.images?.length ? data.images : [null, null, null],
+          sizes: data.sizes || [],
+          colors: data.colors || [],
+          quantity_options: data.quantity_options || [],
+          specifications: data.specifications || {},
+          reviews: data.reviews || [],
+          tags: data.tags || [],
         }));
-      });
-    }
-  });
-}
 
-    });
+        // Load subcategories and items accordingly
+        if (categoryId) {
+          const subRes = await api.get(`/subcategories?category=${categoryId}`);
+          const subData = subRes.data.map((s) => ({ ...s, _id: String(s._id) }));
+          setSubcategories(subData);
+
+          if (subcategoryId) {
+            const itemRes = await api.get(`/items?subcategory=${subcategoryId}`);
+            const itemData = itemRes.data.map((i) => ({ ...i, _id: String(i._id) }));
+            setItems(itemData);
+          }
+        }
+      } catch (err) {
+        console.error("Failed to load product:", err);
+      }
+    };
+
+    fetchProduct();
   }, [productId]);
 
-  // image handlers
+  /* 🟢 Image Handlers */
   const handleImageChange = (index, image) => {
     const newImages = [...form.images];
     newImages[index] = image;
@@ -278,7 +276,7 @@ if (data.category?._id || data.category) {
     setForm({ ...form, images: newImages });
   };
 
-  // submit handler
+  /* 🟢 Submit */
   const handleSubmit = async (e) => {
     e.preventDefault();
     const data = new FormData();
@@ -323,9 +321,15 @@ if (data.category?._id || data.category) {
     }
   };
 
+  /* 🟢 Render Form */
   return (
-    <form onSubmit={handleSubmit} className="max-w-6xl mx-auto p-8 bg-white shadow-lg rounded-lg space-y-8">
-      <h2 className="text-2xl font-bold text-gray-700">{productId ? "Edit Product" : "Add New Product"}</h2>
+    <form
+      onSubmit={handleSubmit}
+      className="max-w-6xl mx-auto p-8 bg-white shadow-lg rounded-lg space-y-8"
+    >
+      <h2 className="text-2xl font-bold text-gray-700">
+        {productId ? "Edit Product" : "Add New Product"}
+      </h2>
 
       {/* Category */}
       <div>
@@ -421,7 +425,10 @@ if (data.category?._id || data.category) {
         values={form.quantity_options}
         onAdd={(val) => setForm({ ...form, quantity_options: [...form.quantity_options, val] })}
         onRemove={(idx) =>
-          setForm({ ...form, quantity_options: form.quantity_options.filter((_, i) => i !== idx) })
+          setForm({
+            ...form,
+            quantity_options: form.quantity_options.filter((_, i) => i !== idx),
+          })
         }
       />
 
@@ -484,7 +491,13 @@ if (data.category?._id || data.category) {
         <label className="block text-sm font-medium text-gray-600">Product Images</label>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-2">
           {form.images.map((img, i) => (
-            <ImageUploader key={i} image={img} index={i} onChange={handleImageChange} onRemove={removeImage} />
+            <ImageUploader
+              key={i}
+              image={img}
+              index={i}
+              onChange={handleImageChange}
+              onRemove={removeImage}
+            />
           ))}
         </div>
       </div>
@@ -508,4 +521,3 @@ if (data.category?._id || data.category) {
     </form>
   );
 }
-

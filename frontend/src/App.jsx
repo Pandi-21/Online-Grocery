@@ -1,3 +1,4 @@
+// App.jsx or AppWrapper.jsx
 import React from "react";
 import { Routes, Route } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
@@ -29,57 +30,59 @@ import OrdersPage from "./Components/OrdersPage";
 import ProtectedRoute from "./Components/ProtectedRoute";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { CartProvider } from "./context/CartContext";
+import { OrdersProvider } from "./context/OrdersContext";
 
 // ---------------- AppInner ----------------
 function AppInner() {
-  const { user } = useAuth(); // ✅ safe here, inside AuthProvider
+  const { user } = useAuth(); // safe inside AuthProvider
 
   return (
     <CartProvider>
-      <Routes>
-        <Route element={<UserLayout />}>
-          {/* Home & Shop */}
-          <Route path="/" element={<Home />} />
-          <Route path="/shop" element={<Shop />} />
-          <Route path="/shop/:subcategory/:item" element={<ProductList />} />
-          <Route path="/shop/:subcategory/:item/:productSlug" element={<ProductDetails />} />
+      <OrdersProvider>
+        <Routes>
+          <Route element={<UserLayout />}>
+            {/* Home & Shop */}
+            <Route path="/" element={<Home />} />
+            <Route path="/shop" element={<Shop />} />
+            <Route path="/shop/:subcategory/:item" element={<ProductList />} />
+            <Route path="/shop/:subcategory/:item/:productSlug" element={<ProductDetails />} />
 
-          {/* Deals */}
-          <Route path="/deals" element={<DealsPage />} />
-          <Route path="/deals/:sectionName" element={<DealsSection />} />
-          <Route path="/deals/product/:id" element={<DealsProduct />} />
+            {/* Deals */}
+            <Route path="/deals" element={<DealsPage />} />
+            <Route path="/deals/:sectionName" element={<DealsSection />} />
+            <Route path="/deals/product/:id" element={<DealsProduct />} />
 
-          {/* Recipes */}
-          <Route path="/recipes/:categorySlug" element={<RecipesPage />} />
-          <Route path="/recipes/:categorySlug/:recipeSlug" element={<RecipeDetail />} />
+            {/* Recipes */}
+            <Route path="/recipes/:categorySlug" element={<RecipesPage />} />
+            <Route path="/recipes/:categorySlug/:recipeSlug" element={<RecipeDetail />} />
 
-          {/* About */}
-          <Route path="/about" element={<About />} />
-          <Route path="/about/our-story" element={<OurStory />} />
-          <Route path="/about/contact" element={<ContactUs />} />
-          <Route path="/about/sustainability" element={<Sustainability />} />
-          <Route path="/about/careers" element={<Careers />} />
-          <Route path="/about/faq" element={<FAQSupport />} />
+            {/* About */}
+            <Route path="/about" element={<About />} />
+            <Route path="/about/our-story" element={<OurStory />} />
+            <Route path="/about/contact" element={<ContactUs />} />
+            <Route path="/about/sustainability" element={<Sustainability />} />
+            <Route path="/about/careers" element={<Careers />} />
+            <Route path="/about/faq" element={<FAQSupport />} />
 
-          {/* Protected pages */}
-          <Route path="/checkout" element={<ProtectedRoute><CheckoutPage /></ProtectedRoute>} />
-          <Route path="/cart" element={<ProtectedRoute><CartPage /></ProtectedRoute>} />
-          <Route path="/account" element={<ProtectedRoute><AccountPage /></ProtectedRoute>} />
+            {/* Protected pages */}
+            <Route path="/checkout" element={<ProtectedRoute><CheckoutPage /></ProtectedRoute>} />
+            <Route path="/cart" element={<ProtectedRoute><CartPage /></ProtectedRoute>} />
+            <Route path="/account" element={<ProtectedRoute><AccountPage /></ProtectedRoute>} />
+            <Route path="/orders" element={<ProtectedRoute><OrdersPage /></ProtectedRoute>} />
 
-          {/* Auth */}
-          <Route path="/signup" element={<Signup />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/orders" element={<ProtectedRoute><OrdersPage /></ProtectedRoute>} />
+            {/* Auth */}
+            <Route path="/signup" element={<Signup />} />
+            <Route path="/login" element={<Login />} />
 
-          {/* Fallback */}
-          <Route path="*" element={<h1>Page Not Found</h1>} />
-        </Route>
+            {/* Fallback */}
+            <Route path="*" element={<h1>Page Not Found</h1>} />
+          </Route>
 
-        {/* Admin */}
-        <Route path="/admin/*" element={<AdminRoutes />} />
-        <Route path="/dashboard" element={<AdminRoutes />} />
-      </Routes>
-
+          {/* Admin */}
+          <Route path="/admin/*" element={<AdminRoutes />} />
+          <Route path="/dashboard" element={<AdminRoutes />} />
+        </Routes>
+      </OrdersProvider>
       <Toaster position="bottom-center" />
     </CartProvider>
   );

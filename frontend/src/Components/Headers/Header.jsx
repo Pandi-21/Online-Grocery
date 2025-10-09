@@ -39,9 +39,14 @@ export default function Header() {
       <div className="container mx-auto flex items-center justify-between py-4 px-6">
         {/* Logo */}
         <Link to="/" className="flex items-center gap-2">
-          <div className="w-6 h-6 bg-green-500 rounded"></div>
-          <span className="text-xl font-bold">FreshMart</span>
-        </Link>
+  <img
+    src="/fresh.jpg"      // replace with your logo path
+    alt="FreshMart Logo"
+    className="w-20 h-26 object-contain"
+  />
+  <span className="text-xl font-bold">FreshMart</span>
+</Link>
+
 
         {/* Desktop Navigation */}
         <DesktopNav 

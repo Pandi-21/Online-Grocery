@@ -13,16 +13,16 @@ export default function RecipeForm() {
   const [title, setTitle] = useState("");
   const [ingredients, setIngredients] = useState("");
   const [steps, setSteps] = useState("");
-  const [images, setImages] = useState([]); // string names or File objects
+  const [images, setImages] = useState([]);
   const [subcategories, setSubcategories] = useState([]);
   const [subcategoryId, setSubcategoryId] = useState("");
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const loadData = async () => {
       try {
         let recipeData = null;
 
-        // fetch recipe (if editing)
         if (id && id !== "new") {
           const res = await getRecipeById(id);
           recipeData = res.data;
@@ -32,7 +32,6 @@ export default function RecipeForm() {
           setImages(recipeData.images || []);
         }
 
-        // fetch subcategories for recipes
         const subRes = await api.get("/subcategories?category=recipes");
         const subResData = subRes.data;
         setSubcategories(subResData);
@@ -49,6 +48,8 @@ export default function RecipeForm() {
         }
       } catch (err) {
         console.error("Error loading recipe form:", err);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -63,13 +64,11 @@ export default function RecipeForm() {
     formData.append("steps", steps);
     formData.append("subcategory_id", subcategoryId);
 
-    // add existing images as JSON
     const existing = images.filter((img) => typeof img === "string");
     if (existing.length) {
       formData.append("existingImages", JSON.stringify(existing));
     }
 
-    // add new files
     images
       .filter((img) => img instanceof File)
       .forEach((file, idx) => {
@@ -82,95 +81,134 @@ export default function RecipeForm() {
       } else {
         await createRecipe(formData);
       }
-      navigate("/admin/recipes"); // go back after save
+      navigate("/admin/recipes");
     } catch (err) {
       console.error("Recipe submit error:", err);
       alert("Error saving recipe");
     }
   };
 
+  if (loading) {
+    return (
+      <div className="p-10 flex justify-center items-center">
+        <p className="text-gray-500 animate-pulse">Loading form...</p>
+      </div>
+    );
+  }
+
   return (
-    <div className="p-6 max-w-3xl">
-      <h1 className="text-2xl font-bold mb-6">
-        {id === "new" ? "Add Recipe" : "Edit Recipe"}
-      </h1>
-      <form onSubmit={handleSubmit} className="grid gap-6">
-        {/* Title */}
-        <div>
-          <label className="block text-sm font-medium mb-1">Title</label>
-          <input
-            type="text"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            className="border rounded w-full px-3 py-2"
-            required
-          />
-        </div>
-
-        {/* Subcategory */}
-        <div>
-          <label className="block text-sm font-medium mb-1">Subcategory</label>
-          <select
-            value={subcategoryId}
-            onChange={(e) => setSubcategoryId(e.target.value)}
-            className="border rounded w-full px-3 py-2"
-            required
-          >
-            <option value="">Select Subcategory</option>
-            {subcategories.map((sub) => (
-              <option key={sub._id} value={sub._id}>
-                {sub.name}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        {/* Ingredients */}
-        <div>
-          <label className="block text-sm font-medium mb-1">Ingredients</label>
-          <textarea
-            rows={4}
-            value={ingredients}
-            onChange={(e) => setIngredients(e.target.value)}
-            className="border rounded w-full px-3 py-2"
-          />
-        </div>
-
-        {/* Steps */}
-        <div>
-          <label className="block text-sm font-medium mb-1">Steps</label>
-          <textarea
-            rows={4}
-            value={steps}
-            onChange={(e) => setSteps(e.target.value)}
-            className="border rounded w-full px-3 py-2"
-          />
-        </div>
-
-        {/* Images */}
-        <ImageUploader
-          images={images}
-          onChange={setImages}
-          backendUrl={BACKEND_URL}
-        />
-
-        {/* Submit & Cancel */}
-        <div className="flex gap-3">
+    <div className="p-6 max-w-4xl mx-auto">
+      <div className="bg-white shadow-md rounded-2xl p-8 border border-gray-100">
+        <div className="flex items-center justify-between mb-6">
+          <h1 className="text-2xl font-semibold text-gray-800">
+            {id === "new" ? "Add New Recipe" : "Edit Recipe"}
+          </h1>
           <button
             type="button"
             onClick={() => navigate("/admin/recipes")}
-            className="bg-gray-300 text-gray-800 px-6 py-2 rounded hover:bg-gray-400"
+            className="text-gray-500 hover:text-gray-700 text-sm transition"
           >
-            Cancel
-          </button>
-          <button
-            type="submit"
-            className="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700"
-          >
-            Save Recipe
+            ← Back to List
           </button>
         </div>
-      </form>
+
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Title */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Recipe Title <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="text"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              className="border border-gray-300 rounded-lg w-full px-4 py-2 focus:ring-2 focus:ring-green-500 focus:outline-none"
+              placeholder="Enter recipe title..."
+              required
+            />
+          </div>
+
+          {/* Subcategory */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Subcategory <span className="text-red-500">*</span>
+            </label>
+            <select
+              value={subcategoryId}
+              onChange={(e) => setSubcategoryId(e.target.value)}
+              className="border border-gray-300 rounded-lg w-full px-4 py-2 focus:ring-2 focus:ring-green-500 focus:outline-none"
+              required
+            >
+              <option value="">Select a Subcategory</option>
+              {subcategories.map((sub) => (
+                <option key={sub._id} value={sub._id}>
+                  {sub.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Ingredients */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Ingredients
+            </label>
+            <textarea
+              rows={4}
+              value={ingredients}
+              onChange={(e) => setIngredients(e.target.value)}
+              className="border border-gray-300 rounded-lg w-full px-4 py-2 focus:ring-2 focus:ring-green-500 focus:outline-none"
+              placeholder="List ingredients (one per line)..."
+            />
+          </div>
+
+          {/* Steps */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Steps
+            </label>
+            <textarea
+              rows={4}
+              value={steps}
+              onChange={(e) => setSteps(e.target.value)}
+              className="border border-gray-300 rounded-lg w-full px-4 py-2 focus:ring-2 focus:ring-green-500 focus:outline-none"
+              placeholder="Describe the steps (one per line)..."
+            />
+          </div>
+
+          {/* Images */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Recipe Images
+            </label>
+            <ImageUploader
+              images={images}
+              onChange={setImages}
+              backendUrl={BACKEND_URL}
+            />
+            <p className="text-xs text-gray-400 mt-1">
+              You can upload up to 5 images.
+            </p>
+          </div>
+
+          {/* Buttons */}
+          <div className="flex justify-end gap-3 pt-4 border-t border-gray-100">
+            <button
+              type="button"
+              onClick={() => navigate("/admin/recipes")}
+              className="px-5 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-100 transition"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="px-5 py-2 rounded-lg bg-green-600 text-white hover:bg-green-700 transition"
+            >
+              Save Recipe
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   );
 }
