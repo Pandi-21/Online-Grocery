@@ -3,9 +3,11 @@ import { useParams, Link } from "react-router-dom";
 import { FaStar, FaShoppingCart } from "react-icons/fa";
 import toast from "react-hot-toast";
 import { API as api } from "../../admin/api/api";
+import { useCart } from "../../context/CartContext"; // Adjust path
 
 const BACKEND_URL = "http://127.0.0.1:5000";
 
+// Sidebar filters component
 function SidebarFilters({ products, onFilter }) {
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [price, setPrice] = useState(10);
@@ -15,15 +17,12 @@ function SidebarFilters({ products, onFilter }) {
   useEffect(() => {
     let filtered = [...products];
 
-    // Category filter
     if (selectedCategory !== "All") {
       filtered = filtered.filter((p) => p.category?.name === selectedCategory);
     }
 
-    // Price filter
     filtered = filtered.filter((p) => Number(p.price) <= price);
 
-    // Rating filter (average rating >= selected rating)
     if (rating > 0) {
       filtered = filtered.filter((p) => {
         const avgRating =
@@ -45,10 +44,7 @@ function SidebarFilters({ products, onFilter }) {
       <div className="mb-6">
         <h3 className="font-semibold mb-2">Category</h3>
         {categories.map((cat) => (
-          <label
-            key={cat}
-            className="flex items-center gap-2 mb-2 cursor-pointer"
-          >
+          <label key={cat} className="flex items-center gap-2 mb-2 cursor-pointer">
             <input
               type="radio"
               name="category"
@@ -92,10 +88,7 @@ function SidebarFilters({ products, onFilter }) {
             />
           ))}
         </div>
-        <button
-          className="text-sm text-gray-700 underline"
-          onClick={() => setRating(0)}
-        >
+        <button className="text-sm text-gray-700 underline" onClick={() => setRating(0)}>
           Clear Rating
         </button>
       </div>
@@ -103,14 +96,15 @@ function SidebarFilters({ products, onFilter }) {
   );
 }
 
+// Main ProductList component
 export default function ProductList() {
   const { subcategory: subcategorySlug, item: itemSlug } = useParams();
+  const { cartItems, addToCart, updateCartItem } = useCart();
 
   const [products, setProducts] = useState([]);
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [quantities, setQuantities] = useState({});
 
   useEffect(() => {
     if (!itemSlug) {
@@ -142,30 +136,10 @@ export default function ProductList() {
     fetchProducts();
   }, [subcategorySlug, itemSlug]);
 
-  // Basket handlers
-  const handleAdd = (id) => {
-    setQuantities((prev) => ({ ...prev, [id]: (prev[id] || 0) + 1 }));
-    toast.success("Item added to your basket successfully", { id: "basket" });
-  };
-
-  const handleIncrement = (id) => {
-    setQuantities((prev) => ({ ...prev, [id]: prev[id] + 1 }));
-    toast.success("Item added to your basket successfully", { id: "basket" });
-  };
-
-  const handleDecrement = (id) => {
-    setQuantities((prev) => {
-      const current = prev[id] || 0;
-      const newQty = current - 1;
-      if (newQty <= 0) {
-        const copy = { ...prev };
-        delete copy[id];
-        toast("Item removed from your basket", { id: "basket" });
-        return copy;
-      }
-      toast("Item removed from your basket", { id: "basket" });
-      return { ...prev, [id]: newQty };
-    });
+  // Helper to get current quantity in cart
+  const getQty = (productId) => {
+    const item = cartItems.find((i) => i.product_id === productId);
+    return item ? item.quantity : 0;
   };
 
   if (!itemSlug) {
@@ -198,7 +172,7 @@ export default function ProductList() {
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             {filteredProducts.map((p) => {
               const id = p._id || p.id;
-              const qty = quantities[id] || 0;
+              const qty = getQty(id);
 
               return (
                 <div
@@ -206,7 +180,7 @@ export default function ProductList() {
                   className="bg-white rounded-xl shadow-md p-4 flex flex-col hover:shadow-lg transition duration-300"
                 >
                   <Link
-                    to={`/shop/${p.subcategory_slug || "unknown-subcategory"}/${p.item_slug || "unknown-item"}/${p.slug || p._id}`}
+                    to={`/shop/${p.subcategory_slug || "unknown-subcategory"}/${p.item_slug || "unknown-item"}/${p.slug || id}`}
                   >
                     {p.images?.length > 0 && (
                       <img
@@ -233,7 +207,7 @@ export default function ProductList() {
 
                     {qty === 0 ? (
                       <button
-                        onClick={() => handleAdd(id)}
+                        onClick={() => addToCart(p, 1)}
                         className="mt-2 w-full flex items-center justify-center gap-2 bg-green-500 text-white px-4 py-2 rounded-full hover:bg-green-600 transition duration-300"
                       >
                         <FaShoppingCart />
@@ -242,14 +216,14 @@ export default function ProductList() {
                     ) : (
                       <div className="mt-2 flex items-center justify-center gap-3">
                         <button
-                          onClick={() => handleDecrement(id)}
+                          onClick={() => updateCartItem(cartItems.find(i => i.product_id === id)._id, qty - 1)}
                           className="bg-red-500 text-white px-3 py-1 rounded-full hover:bg-red-600"
                         >
                           −
                         </button>
                         <span className="font-semibold">{qty}</span>
                         <button
-                          onClick={() => handleIncrement(id)}
+                          onClick={() => updateCartItem(cartItems.find(i => i.product_id === id)._id, qty + 1)}
                           className="bg-green-500 text-white px-3 py-1 rounded-full hover:bg-green-600"
                         >
                           +

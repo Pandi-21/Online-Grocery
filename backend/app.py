@@ -1,7 +1,7 @@
 from flask import Flask, send_from_directory
 from flask_cors import CORS
 from flask_pymongo import PyMongo
-from config import MONGO_URI
+from config import Config
 import os
 
 # Import Blueprints
@@ -14,23 +14,43 @@ from routes.cart import cart_bp
 from routes.orders import orders_bp
 from routes.dashboard import dashboard_bp
 from routes.users import user_bp
+from routes.auth import auth_bp
+from routes.mail_routes import mail_bp
+from routes.sms_routes import sms_bp
 
+from extensions import mail, jwt, mongo
+
+# -----------------------------
+# Initialize Flask App
+# -----------------------------
 app = Flask(__name__)
 CORS(app)
 
-# ✅ MongoDB Config
-app.config["MONGO_URI"] = MONGO_URI
-mongo = PyMongo(app)
+# -----------------------------
+# MongoDB Config
+# -----------------------------
+app.config.from_object(Config)
+mongo.init_app(app)
 
-# ✅ Shortcut DB instance
+# Shortcut DB instance
 app.mongo = mongo
 app.db = mongo.db
 
-# ✅ Uploads folder
+# -----------------------------
+# Extensions
+# -----------------------------
+mail.init_app(app)
+jwt.init_app(app)
+
+# -----------------------------
+# Uploads folder
+# -----------------------------
 UPLOAD_FOLDER = os.path.join(os.getcwd(), "uploads")
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
-# ✅ Register Blueprints
+# -----------------------------
+# Register Blueprints
+# -----------------------------
 app.register_blueprint(categories_bp)
 app.register_blueprint(subcategories_bp)
 app.register_blueprint(items_bp)
@@ -39,16 +59,32 @@ app.register_blueprint(recipes_bp)
 app.register_blueprint(cart_bp)
 app.register_blueprint(orders_bp)
 app.register_blueprint(dashboard_bp)
-app.register_blueprint(user_bp)
+# app.register_blueprint(user_bp)
 
-# ✅ Serve uploaded files
+# Auth blueprint
+app.register_blueprint(auth_bp, url_prefix="/auth")
+app.register_blueprint(user_bp, url_prefix="/user")
+
+# Mail & SMS blueprints (user notifications)
+app.register_blueprint(mail_bp, url_prefix="/user")
+app.register_blueprint(sms_bp, url_prefix="/user")
+
+# -----------------------------
+# Serve uploaded files
+# -----------------------------
 @app.route("/uploads/<filename>")
 def uploaded_file(filename):
     return send_from_directory(UPLOAD_FOLDER, filename)
 
+# -----------------------------
+# Test route
+# -----------------------------
 @app.route("/")
 def home():
     return {"message": "Backend running with Flask & MongoDB!"}
 
+# -----------------------------
+# Run the app
+# -----------------------------
 if __name__ == "__main__":
     app.run(debug=True)

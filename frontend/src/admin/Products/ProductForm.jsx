@@ -277,49 +277,56 @@ export default function ProductForm() {
   };
 
   /* 🟢 Submit */
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    const data = new FormData();
+  /* 🟢 Submit */
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  const data = new FormData();
 
-    data.append("category", form.category);
-    data.append("subcategory", form.subcategory);
-    data.append("item", form.item);
-    data.append("name", form.name);
-    data.append("price", form.price);
-    data.append("description", form.description);
+  data.append("category", form.category);
+  data.append("subcategory", form.subcategory);
+  data.append("item", form.item);
+  data.append("name", form.name);
+  data.append("price", form.price);
+  data.append("description", form.description);
 
-    form.sizes.forEach((s) => data.append("sizes[]", s));
-    form.colors.forEach((c) => data.append("colors[]", c));
-    form.quantity_options.forEach((q) => data.append("quantity_options[]", q));
-    form.tags.forEach((t) => data.append("tags[]", t));
-    data.append("specifications", JSON.stringify(form.specifications));
+  form.sizes.forEach((s) => data.append("sizes[]", s));
+  form.colors.forEach((c) => data.append("colors[]", c));
 
-    form.images.forEach((img, i) => {
-      if (img instanceof File) {
-        data.append(`image_${i}`, img);
-      } else if (typeof img === "string") {
-        data.append("existingImages[]", img);
-      }
-    });
+  // ✅ Convert quantity_options to numbers before sending
+  form.quantity_options
+    .map((q) => Number(q))
+    .forEach((q) => data.append("quantity_options[]", q));
 
-    try {
-      if (productId) {
-        await api.put(`/products/${productId}`, data, {
-          headers: { "Content-Type": "multipart/form-data" },
-        });
-        alert("Product updated ✅");
-      } else {
-        await api.post("/products", data, {
-          headers: { "Content-Type": "multipart/form-data" },
-        });
-        alert("Product created ✅");
-      }
-      navigate("/admin/products");
-    } catch (err) {
-      console.error(err);
-      alert("Error saving product ❌");
+  form.tags.forEach((t) => data.append("tags[]", t));
+  data.append("specifications", JSON.stringify(form.specifications));
+
+  form.images.forEach((img, i) => {
+    if (img instanceof File) {
+      data.append(`image_${i}`, img);
+    } else if (typeof img === "string") {
+      data.append("existingImages[]", img);
     }
-  };
+  });
+
+  try {
+    if (productId) {
+      await api.put(`/products/${productId}`, data, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      alert("Product updated ✅");
+    } else {
+      await api.post("/products", data, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      alert("Product created ✅");
+    }
+    navigate("/admin/products");
+  } catch (err) {
+    console.error(err);
+    alert("Error saving product ❌");
+  }
+};
+
 
   /* 🟢 Render Form */
   return (

@@ -102,12 +102,22 @@ def update_user(user_id):
         return jsonify({"error": "Invalid user ID"}), 400
 
     data = request.json or {}
+    # Remove _id if present to avoid MongoDB immutable field error
+    data.pop("_id", None)
+
+    if not data:
+        return jsonify({"error": "No update data provided"}), 400
+
     if "password" in data:
         data["password"] = generate_password_hash(data["password"])
 
-    result = db.users.update_one({"_id": obj_id}, {"$set": data})
+    try:
+        result = db.users.update_one({"_id": obj_id}, {"$set": data})
+    except Exception as e:
+        return jsonify({"error": "Database update failed", "details": str(e)}), 500
 
     if result.matched_count == 0:
         return jsonify({"error": "User not found"}), 404
 
     return jsonify({"message": "User updated successfully"})
+
