@@ -2,7 +2,7 @@
 import axios from "axios";
 
 // Common backend URL
-const BACKEND_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
+const BACKEND_URL = import.meta.env.VITE_API_BASE_URL || "http://13.60.199.20";
 
 // Axios instance
 const API = axios.create({

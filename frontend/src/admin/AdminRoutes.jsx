@@ -5,19 +5,14 @@ import ProductList from "./Products/ProductList";
 import ProductForm from "./Products/ProductForm";
  
  
-import CouponForm from "./Coupons/CouponForm";
-import CouponList from "./Coupons/CouponList";
  
- 
-// import ReportPage from "./Reports/ReportPage";
+  
 import RecipesList from "./Receipes/RecipesList";
 import RecipeForm from "./Receipes/RecipeForm";
 import AdminOrders from "./Orders/AdminOrders";
 import AdminOrderDetails from "./Orders/AdminOrderDetails";
 import { OrdersProvider } from "../context/OrdersContext";
-// import { OrdersProvider } from ".../context/OrdersContext";
-// import AdminOrders from ".//AdminOrders";
-// import AdminOrderDetails from "./Pages/AdminOrderDetails";
+ 
 
 export default function AdminRoutes() {
   return (
@@ -35,23 +30,21 @@ export default function AdminRoutes() {
 
         
         
-    <Route path="orders" element={<AdminOrders />} />
-<Route path="orders/:id" element={<AdminOrderDetails />} />
-    {/* Coupons */}
-    <Route path="coupons" element={<CouponList />} />
-    <Route path="coupons/new" element={<CouponForm />} />
-    <Route path="coupons/edit/:id" element={<CouponForm />} />
-   
- 
-{/* 
-<Route path="reports" element={<ReportPage />} /> */}
-         
-        </Route>
-      </Routes>
-      </OrdersProvider>
-   
-  );
-}
+          <Route path="orders" element={<AdminOrders />} />
+      <Route path="orders/:id" element={<AdminOrderDetails />} />
+          {/* Coupons */}
+      
+        
+      
+      {/* 
+      <Route path="reports" element={<ReportPage />} /> */}
+              
+              </Route>
+            </Routes>
+            </OrdersProvider>
+        
+        );
+      }
 
 
 

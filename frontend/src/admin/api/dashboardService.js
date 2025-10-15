@@ -1,9 +1,19 @@
+// 📁 src/api/adminApi.js
 import axios from "axios";
 
-const API_URL = "http://localhost:5000/admin";
+// ✅ Get base URL from .env (with fallback)
+const BACKEND_URL = import.meta.env.VITE_API_BASE_URL || "http://13.60.199.20";
 
-const api = axios.create({ baseURL: API_URL, headers: { "Content-Type": "application/json" } });
+// ✅ Admin API base URL
+const API_URL = `${BACKEND_URL}/admin`;
 
+// ✅ Axios instance
+const api = axios.create({
+  baseURL: API_URL,
+  headers: { "Content-Type": "application/json" },
+});
+
+// 📊 Get Dashboard Stats
 export const getDashboardStats = async () => {
   try {
     const res = await api.get("/dashboard-stats");
@@ -15,6 +25,7 @@ export const getDashboardStats = async () => {
   }
 };
 
+// 🧾 Get Latest Orders
 export const getLatestOrders = async () => {
   try {
     const res = await api.get("/latest-orders");

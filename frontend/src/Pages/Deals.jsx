@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 
-const BACKEND_URL = "http://127.0.0.1:5000";
+const BACKEND_URL = import.meta.env.VITE_API_BASE_URL;
 
 export default function DealsPage() {
   const [dealsData, setDealsData] = useState({});

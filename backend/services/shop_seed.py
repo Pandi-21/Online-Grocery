@@ -4,7 +4,7 @@ from flask_pymongo import PyMongo
 import re, unicodedata
 
 app = Flask(__name__)
-app.config["MONGO_URI"] = "mongodb://localhost:27017/myshop"
+app.config["MONGO_URI"] = "os.getenv("MONGO_URI")"
 mongo = PyMongo(app)
 
 def slugify(text: str) -> str:

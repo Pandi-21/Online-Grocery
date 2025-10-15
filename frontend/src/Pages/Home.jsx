@@ -38,7 +38,7 @@ export default function Home() {
       {/* Hero Section */}
       <section className="relative bg-gray-900 text-white">
         <img
-          src="https://images.unsplash.com/photo-1606788075761-9b008e826b97"
+          src="/fresh.jpg"
           alt="Groceries"
           className="absolute inset-0 w-full h-full object-cover opacity-70"
         />
@@ -51,7 +51,7 @@ export default function Home() {
             straight to your door.
           </p>
           <button
-            className="bg-green-500 hover:bg-green-600 text-white font-semibold px-6 py-3 rounded-full"
+            className="bg-green-900 hover:bg-green-800 text-white font-semibold px-6 py-3 rounded-full"
             onClick={() => navigate("/shop")}
           >
             Shop Now

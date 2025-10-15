@@ -3,28 +3,33 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import toast from "react-hot-toast";
 
+// ✅ Use .env variable
+const USER_BASE_URL = `${import.meta.env.VITE_API_BASE_URL}/user`;
+
 const AuthContext = createContext();
-const BASE_URL = "http://localhost:5000/user";
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
+  const [admin, setAdmin] = useState(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
-  // 🔹 Restore user from localStorage on reload
+  // 🔹 Restore user/admin from localStorage on reload
   useEffect(() => {
     const savedUser = localStorage.getItem("user");
-    const token = localStorage.getItem("token");
-    if (savedUser && token) {
-      setUser(JSON.parse(savedUser));
-    }
+    const userToken = localStorage.getItem("token");
+    if (savedUser && userToken) setUser(JSON.parse(savedUser));
+
+    const savedAdmin = localStorage.getItem("admin");
+    if (savedAdmin) setAdmin(JSON.parse(savedAdmin));
+
     setLoading(false);
   }, []);
 
-  // 🔹 Signup
+  // 🔹 User Signup
   const signup = async (name, email, password) => {
     try {
-      const res = await axios.post(`${BASE_URL}/signup`, { name, email, password });
+      const res = await axios.post(`${USER_BASE_URL}/signup`, { name, email, password });
       const { user: newUser, token } = res.data;
 
       setUser(newUser);
@@ -41,10 +46,10 @@ export function AuthProvider({ children }) {
     }
   };
 
-  // 🔹 Login
-  const login = async (email, password) => {
+  // 🔹 User Login
+  const loginUser = async (email, password) => {
     try {
-      const res = await axios.post(`${BASE_URL}/login`, { email, password });
+      const res = await axios.post(`${USER_BASE_URL}/login`, { email, password });
       const { user: loggedInUser, token } = res.data;
 
       setUser(loggedInUser);
@@ -61,18 +66,39 @@ export function AuthProvider({ children }) {
     }
   };
 
-  // 🔹 Logout
+  // 🔹 Admin Login
+  const loginAdmin = (adminData) => {
+    setAdmin(adminData);
+    localStorage.setItem("admin", JSON.stringify(adminData));
+    toast.success(`Admin logged in 👮`);
+    navigate("/admin/dashboard");
+  };
+
+  // 🔹 Logout (for both user and admin)
   const logout = () => {
+    setUser(null);
+    setAdmin(null);
     localStorage.removeItem("user");
     localStorage.removeItem("userId");
     localStorage.removeItem("token");
-    setUser(null);
+    localStorage.removeItem("admin");
+
     toast("Logged out successfully 👋", { icon: "🚪" });
     navigate("/login");
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, signup, login, logout }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        admin,
+        loading,
+        signup,
+        loginUser,
+        loginAdmin,
+        logout,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );

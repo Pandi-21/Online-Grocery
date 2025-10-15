@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { getRecipes, deleteRecipe } from "../api/recipesApi";
 import { Pencil, Trash2 } from "lucide-react"; // icons
 
-const BACKEND_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+const BACKEND_URL =import.meta.env.VITE_API_BASE_URL || "http://13.60.199.20";
 
 export default function RecipesList() {
   const [recipes, setRecipes] = useState([]);

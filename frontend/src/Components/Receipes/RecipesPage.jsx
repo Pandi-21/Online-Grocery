@@ -2,7 +2,7 @@ import { useParams, Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { getRecipes } from "../../admin/api/recipesApi";
 
-const BACKEND_URL = import.meta.env.VITE_API_URL || "http://localhost:5000"; // update your API
+const BACKEND_URL = import.meta.env.VITE_API_BASE_URL || "http://13.60.199.20"; // update your API
 
 export default function RecipesPage() {
   const { categorySlug } = useParams(); // dynamic category

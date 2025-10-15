@@ -5,7 +5,7 @@ import toast from "react-hot-toast";
 import { API as api } from "../../admin/api/api";
 import { useCart } from "../../context/CartContext"; // Adjust path
 
-const BACKEND_URL = "http://127.0.0.1:5000";
+const BACKEND_URL = import.meta.env.VITE_API_BASE_URL;
 
 // Sidebar filters component
 function SidebarFilters({ products, onFilter }) {

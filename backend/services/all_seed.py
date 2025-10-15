@@ -9,7 +9,7 @@ from recipes_seed import seed_recipes
 
 # --- Flask app setup ---
 app = Flask(__name__)
-app.config["MONGO_URI"] = "mongodb://localhost:27017/myshop"
+app.config["MONGO_URI"] = "os.getenv("MONGO_URI")"
 mongo = PyMongo(app)
 
 # --- Run both seeds ---

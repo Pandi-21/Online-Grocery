@@ -1,71 +1,13 @@
-// import axios from "axios";
-
-// const API_URL = "http://127.0.0.1:5000/cart";
-
-// // Add to cart
-// export const addToCart = async (userId, productId, quantity = 1) => {
-//   try {
-//     const res = await axios.post(`${API_URL}/add`, {
-//       user_id: userId,
-//       product_id: productId,
-//       quantity,
-//     });
-//     return res.data;
-//   } catch (err) {
-//     console.error("Add to cart error:", err);
-//     return { error: err.response?.data?.error || "Add to cart failed" };
-//   }
-// };
-
-// // Get cart items
-// // Get cart items
-// export const getCartItems = async (userId) => {
-//   try {
-//     const res = await axios.get(`${API_URL}/${userId}`);
-
-//     // ✅ adjust according to backend response
-//     if (Array.isArray(res.data)) {
-//       return res.data;
-//     } else if (res.data?.cartItems) {
-//       return res.data.cartItems;  // 👈 fix here
-//     }
-//     return [];
-//   } catch (err) {
-//     console.error("Fetch cart error:", err);
-//     return [];
-//   }
-// };
-
-
-// // Update cart item quantity
-// export const updateCartItem = async (cartId, quantity) => {
-//   try {
-//     const res = await axios.post(`${API_URL}/update`, {
-//       cart_id: cartId,
-//       quantity,
-//     });
-//     return res.data;
-//   } catch (err) {
-//     console.error("Update error:", err);
-//     return { error: "Update failed" };
-//   }
-// };
-
-// // Remove item from cart
-// export const removeCartItem = async (cartId) => {
-//   try {
-//     const res = await axios.post(`${API_URL}/remove`, { cart_id: cartId });
-//     return res.data;
-//   } catch (err) {
-//     console.error("Remove error:", err);
-//     return { error: "Remove failed" };
-//   }
-// };
+// 📁 src/api/cartapi.js
 import axios from "axios";
 
-const API_URL = "http://127.0.0.1:5000/cart";
+// ✅ Load base URL from .env (with fallback if needed)
+const BACKEND_URL = import.meta.env.VITE_API_BASE_URL || "http://13.60.199.20";
 
-// Add to cart
+// ✅ Cart API base
+const API_URL = `${BACKEND_URL}/cart`;
+
+// 🛒 Add to Cart
 export const addToCart = async (userId, productId, quantity = 1) => {
   try {
     const res = await axios.post(`${API_URL}/add`, {
@@ -80,18 +22,18 @@ export const addToCart = async (userId, productId, quantity = 1) => {
   }
 };
 
-// Get cart items
+// 🧾 Get Cart Items
 export const getCartItems = async (userId) => {
   try {
     const res = await axios.get(`${API_URL}/${userId}`);
-    return res.data?.cartItems || []; // ✅ backend returns { cartItems: [...] }
+    return res.data?.cartItems || [];
   } catch (err) {
     console.error("Fetch cart error:", err);
     return [];
   }
 };
 
-// Update cart item quantity
+// ✏️ Update Cart Item Quantity
 export const updateCartItem = async (cartId, quantity) => {
   try {
     const res = await axios.put(`${API_URL}/update/${cartId}`, { quantity });
@@ -102,7 +44,7 @@ export const updateCartItem = async (cartId, quantity) => {
   }
 };
 
-// Remove item from cart
+// ❌ Remove Cart Item
 export const removeCartItem = async (cartId) => {
   try {
     const res = await axios.delete(`${API_URL}/remove/${cartId}`);
@@ -113,7 +55,7 @@ export const removeCartItem = async (cartId) => {
   }
 };
 
-// Clear cart
+// 🧹 Clear Cart
 export const clearCart = async (userId) => {
   try {
     const res = await axios.delete(`${API_URL}/clear/${userId}`);

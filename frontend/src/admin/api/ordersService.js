@@ -33,7 +33,10 @@
 // };
 import axios from "axios";
 
-const API_URL = "http://localhost:5000/orders";
+const BACKEND_URL = import.meta.env.VITE_API_BASE_URL || "http://13.60.199.20";
+
+// ✅ Admin API base URL
+const API_URL = `${BACKEND_URL}/orders`;
 
 // Get all orders (admin)
 export const getAllOrders = async () => {

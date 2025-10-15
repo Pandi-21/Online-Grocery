@@ -14,7 +14,7 @@ export default function Sidebar() {
     { to: "/admin/products", label: "Products", icon: Package },
     { to: "/admin/recipes", label: "Recipes", icon: List },
     { to: "/admin/orders", label: "Orders", icon: ShoppingCart },
-    { to: "/admin/coupons", label: "Coupons", icon: TicketPercent },
+  
   ];
 
   return (

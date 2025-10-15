@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { API as api } from "../../admin/api/api";
 
-const BACKEND_URL = "http://127.0.0.1:5000";
+const BACKEND_URL = import.meta.env.VITE_API_BASE_URL;
 
 /* ⬇️ Reusable ImageUploader */
 function ImageUploader({ image, index, onChange, onRemove }) {

@@ -1,8 +1,11 @@
 import React from "react";
 import { Outlet } from "react-router-dom";
 import Sidebar from "./Sidebar";
+import { useAdminAuth } from "../../context/AdminAuthContext";
 
 export default function AdminLayout() {
+  const { logout } = useAdminAuth();
+
   return (
     <div className="flex">
       {/* left menu */}
@@ -13,7 +16,10 @@ export default function AdminLayout() {
         {/* header bar */}
         <header className="bg-white shadow p-4 flex justify-between items-center">
           <h1 className="text-lg font-bold">Admin Dashboard</h1>
-          <button className="bg-red-500 text-white px-3 py-1 rounded">
+          <button
+            onClick={logout}
+            className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 transition"
+          >
             Logout
           </button>
         </header>

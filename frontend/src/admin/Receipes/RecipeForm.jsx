@@ -4,7 +4,7 @@ import { getRecipeById, createRecipe, updateRecipe } from "../api/recipesApi";
 import { API as api } from "../api/api";
 import ImageUploader from "./ImageUploader";
 
-const BACKEND_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+const BACKEND_URL = import.meta.env.VITE_API_BASE_URL || "http://13.60.199.20";
 
 export default function RecipeForm() {
   const { id } = useParams();

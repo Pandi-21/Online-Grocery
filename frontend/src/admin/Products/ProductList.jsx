@@ -7,7 +7,7 @@ export default function ProductList() {
   const [deleteId, setDeleteId] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const BACKEND_URL = "http://127.0.0.1:5000";
+const BACKEND_URL = import.meta.env.VITE_API_BASE_URL;
 
   useEffect(() => {
     loadProducts();

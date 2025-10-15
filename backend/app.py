@@ -27,12 +27,17 @@ app = Flask(__name__)
 CORS(app)
 
 # -----------------------------
-# MongoDB Config
+# Load Config
 # -----------------------------
 app.config.from_object(Config)
-mongo.init_app(app)
 
-# Shortcut DB instance
+# Debug: confirm Mongo URI is loaded
+print("MONGO_URI =", app.config.get("MONGO_URI"))
+
+# -----------------------------
+# MongoDB
+# -----------------------------
+mongo.init_app(app)
 app.mongo = mongo
 app.db = mongo.db
 
@@ -59,13 +64,12 @@ app.register_blueprint(recipes_bp)
 app.register_blueprint(cart_bp)
 app.register_blueprint(orders_bp)
 app.register_blueprint(dashboard_bp)
-# app.register_blueprint(user_bp)
 
-# Auth blueprint
+# Auth / User
 app.register_blueprint(auth_bp, url_prefix="/auth")
 app.register_blueprint(user_bp, url_prefix="/user")
 
-# Mail & SMS blueprints (user notifications)
+# Mail & SMS
 app.register_blueprint(mail_bp, url_prefix="/user")
 app.register_blueprint(sms_bp, url_prefix="/user")
 
@@ -87,4 +91,5 @@ def home():
 # Run the app
 # -----------------------------
 if __name__ == "__main__":
-    app.run(debug=True)
+    # Debug mode ON for EC2 initial setup
+    app.run(host="0.0.0.0", port=5000, debug=True)

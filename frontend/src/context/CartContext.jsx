@@ -4,11 +4,16 @@ import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "./AuthContext";
 
-const BASE_URL = "http://localhost:5000/cart";
+// ✅ Use .env variable
+const BASE_URL = `${import.meta.env.VITE_API_BASE_URL}/cart`;
+
 const CartContext = createContext();
 export const useCart = () => useContext(CartContext);
 
-const cartAPI = axios.create({ baseURL: BASE_URL, headers: { "Content-Type": "application/json" } });
+const cartAPI = axios.create({
+  baseURL: BASE_URL,
+  headers: { "Content-Type": "application/json" },
+});
 
 export function CartProvider({ children }) {
   const { user } = useAuth();
@@ -16,7 +21,7 @@ export function CartProvider({ children }) {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
-  // Fetch cart on user login
+  // 🔹 Fetch cart on user login
   useEffect(() => {
     const fetchCart = async () => {
       if (!user?._id) { 
@@ -36,7 +41,7 @@ export function CartProvider({ children }) {
     fetchCart();
   }, [user]);
 
-  // Add product to cart
+  // 🔹 Add product to cart
   const addToCart = async (product, quantity = 1) => {
     if (!user?._id) { 
       toast.error("Login required"); 
@@ -51,12 +56,19 @@ export function CartProvider({ children }) {
     quantity = Math.max(1, quantity);
 
     try {
-      const res = await cartAPI.post("/add", { user_id: user._id, product_id: product._id, quantity });
+      const res = await cartAPI.post("/add", {
+        user_id: user._id,
+        product_id: product._id,
+        quantity
+      });
+
       setCartItems(prev => {
         const existing = prev.find(i => i.product_id === product._id);
         if (existing) {
           return prev.map(i =>
-            i.product_id === product._id ? { ...i, quantity: i.quantity + quantity } : i
+            i.product_id === product._id
+              ? { ...i, quantity: i.quantity + quantity }
+              : i
           );
         }
         return [...prev, {
@@ -74,7 +86,7 @@ export function CartProvider({ children }) {
     }
   };
 
-  // Update cart quantity
+  // 🔹 Update cart quantity
   const updateCartItem = async (cartId, quantity) => {
     if (!cartId || quantity < 1) return;
     try {
@@ -86,7 +98,7 @@ export function CartProvider({ children }) {
     }
   };
 
-  // Remove single cart item
+  // 🔹 Remove single cart item
   const removeCartItem = async (cartId) => {
     if (!cartId) return;
     try {
@@ -98,7 +110,7 @@ export function CartProvider({ children }) {
     }
   };
 
-  // Clear entire cart
+  // 🔹 Clear entire cart
   const clearCart = async () => {
     if (!user?._id) return;
     try {
@@ -111,6 +123,7 @@ export function CartProvider({ children }) {
     }
   };
 
+  // 🔹 Total price
   const totalPrice = useMemo(() =>
     cartItems.reduce((acc, item) => acc + item.quantity * (item.product_price || 0), 0),
     [cartItems]
